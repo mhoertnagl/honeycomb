@@ -6,10 +6,10 @@ import java.util.Arrays;
 
 public class AnyParser<T> implements Parser<T> {
 
-  private final Parser<T>[] parsers;
+  private final Parser<? extends T>[] parsers;
   
   @SafeVarargs
-  public AnyParser(Parser<T>... parsers) {
+  public AnyParser(Parser<? extends T>... parsers) {
     this.parsers = parsers;
   }
 
@@ -17,15 +17,12 @@ public class AnyParser<T> implements Parser<T> {
   public <S> State<T> parse(State<S> state, String value) {
     return Arrays.stream(parsers).reduce(
             state.error("Alternatives exhausted"),
+            // TODO: Undertyped.
+            // (s, p) -> s.or(() -> (State<T>) p.parse(state, value)),
             (s, p) -> s.or(() -> p.parse(state, value)),
             (_a, _b) -> null
     );
   }
-
-//  @Override
-//  public <U> Parser<U> map(Function<T, U> mapping) {
-//    return new MapParser<>(this, mapping);
-//  }
 }
 
 //public class Any2Parser<T1,T2> implements Parser<Tuple2<T1, T2>> {

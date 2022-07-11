@@ -10,18 +10,18 @@ class MaybeParserTest {
 
     @Test
     void parseExisting() {
-        final var parser = new RegexParser("[a-zA-Z][a-zA-Z0-9]*");
-        final var maybeParser = new MaybeParser<>(parser);
-        final var state = maybeParser.parse("prevVal");
+        final var p = new RegexParser("[a-zA-Z][a-zA-Z0-9]*");
+        final var parser = new MaybeParser<>(p);
+        final var state = parser.parse("prevVal");
         assertTrue(state.isPresent());
         assertEquals(Optional.of("prevVal"), state.get());
     }
 
     @Test
     void parseNonExisting() {
-        final var parser = new RegexParser("[a-zA-Z][a-zA-Z0-9]*");
-        final var maybeParser = new MaybeParser<>(parser);
-        final var state = maybeParser.parse("42");
+        final var p = new RegexParser("[a-zA-Z][a-zA-Z0-9]*");
+        final var parser = new MaybeParser<>(p);
+        final var state = parser.parse("42");
         assertTrue(state.isPresent());
         assertEquals(Optional.empty(), state.get());
     }
@@ -29,10 +29,10 @@ class MaybeParserTest {
     @Test
     void parseMap() {
         record IdNode(String id) {}
-        final var parser = new RegexParser("[a-zA-Z][a-zA-Z0-9]*")
+        final var p = new RegexParser("[a-zA-Z][a-zA-Z0-9]*")
                 .map(IdNode::new);
-        final var maybeParser = new MaybeParser<>(parser);
-        final var state = maybeParser.parse("prevVal");
+        final var parser = new MaybeParser<>(p);
+        final var state = parser.parse("prevVal");
         assertTrue(state.isPresent());
         assertEquals(Optional.of(new IdNode("prevVal")), state.get());
     }

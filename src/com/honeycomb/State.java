@@ -47,7 +47,7 @@ public abstract class State<T> {
     return error(pos, row, col, format, args);
   }
 
-  public abstract <U> State<U> map(Function<T, U> mapping);
+  public abstract <U> State<U> map(Function<? super T, ? extends U> mapping);
 
   public abstract State<T> or(Supplier<State<T>> supplier);
 
@@ -65,7 +65,7 @@ public abstract class State<T> {
     }
 
     @Override
-    public <U> State<U> map(Function<T, U> mapping) {
+    public <U> State<U> map(Function<? super T, ? extends U> mapping) {
       return new ResultState<>(pos, row, col, mapping.apply(val));
     }
 
@@ -95,7 +95,7 @@ public abstract class State<T> {
     }
 
     @Override
-    public <U> State<U> map(Function<T, U> mapping) {
+    public <U> State<U> map(Function<? super T, ? extends U> mapping) {
       return new ErrorState<>(pos, row, col, err);
     }
 

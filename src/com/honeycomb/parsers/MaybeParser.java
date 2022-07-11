@@ -14,7 +14,7 @@ public class MaybeParser<T> implements Parser<Optional<T>> {
   
   public <S> State<Optional<T>> parse(State<S> state, String value) {
     return parser.parse(state, value)
-            .map(Optional::of)
+            .map(Optional::<T>of)
             .or(() -> state.map(_v -> Optional.empty()));
   }
 }
