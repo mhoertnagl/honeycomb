@@ -1,10 +1,8 @@
 package com.honeycomb.parsers;
 
-import com.honeycomb.Tuple2;
 import com.honeycomb.State;
 
 import java.util.Arrays;
-import java.util.function.Function;
 
 public class AnyParser<T> implements Parser<T> {
 

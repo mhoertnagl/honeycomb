@@ -2,8 +2,6 @@ package com.honeycomb.parsers;
 
 import com.honeycomb.State;
 
-import java.util.function.Function;
-
 public class LiteralParser implements Parser<String> {
 
   private final String pattern;
@@ -39,9 +37,4 @@ public class LiteralParser implements Parser<String> {
 
     return State.result(pos, state.row, state.col + plen, pattern);
   }
-
-//  @Override
-//  public <U> Parser<U> map(Function<String,U> mapping) {
-//    return new MapParser<>(this, mapping);
-//  }
 }

@@ -1,6 +1,7 @@
 package com.honeycomb;
 
-import java.util.Optional;
+import com.honeycomb.funs.Fun2;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 

@@ -1,6 +1,5 @@
 package com.honeycomb.parsers;
 
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import com.honeycomb.State;
@@ -29,9 +28,4 @@ public class RegexParser implements Parser<String> {
     }
     return state.error("Expecting matching pattern [%s]", matcher.pattern());
   }
-
-//  @Override
-//  public <U> Parser<U> map(Function<String, U> mapping) {
-//    return null;
-//  }
 }
