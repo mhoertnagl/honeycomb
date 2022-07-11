@@ -1,23 +1,29 @@
 package com.honeycomb.parsers;
 
 import com.honeycomb.State;
-import com.honeycomb.ParserException;
 
-public class ManyParser<T> implements Parser<T> {
+import java.util.List;
 
-  private final Parser parser;
+public class ManyParser<T> implements Parser<List<T>> {
+
+  private final Parser<T> parser;
   
-  public ManyParser(Parser parser) {
+  public ManyParser(Parser<T> parser) {
     this.parser = parser;
   }
-  
-  public <S> State<T> parse(State<S> state, String value) {
-    var prevState = state;
-    var nextState = parser.parse(prevState, value);
-    while (nextState.isValid()) {
-      prevState = nextState;
-      nextState = parser.parse(prevState, value);
-    }
-    return prevState;
+
+  @Override
+  public <S> State<List<T>> parse(State<S> state, String value) {
+    return null;
   }
+
+//  public <S> State<T> parse(State<S> state, String value) {
+//    var prevState = state;
+//    var nextState = parser.parse(prevState, value);
+//    while (nextState.isValid()) {
+//      prevState = nextState;
+//      nextState = parser.parse(prevState, value);
+//    }
+//    return prevState;
+//  }
 }

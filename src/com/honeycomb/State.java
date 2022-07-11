@@ -1,5 +1,6 @@
 package com.honeycomb;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -13,6 +14,16 @@ public abstract class State<T> {
     this.pos = pos;
     this.row = row;
     this.col = col;
+  }
+
+  public static <T1,T2, R> R whenAll(
+          State<T1> s1,
+          State<T2> s2,
+          Fun2<T1, T2, R> fun) {
+    if (s1.isPresent() && s2.isPresent()) {
+      fun.apply(s1.get(), s2.get());
+    }
+    return null;
   }
 
   public static <T> State<T> result(int pos, int row, int col, T val) {
@@ -39,6 +50,10 @@ public abstract class State<T> {
 
   public abstract State<T> or(Supplier<State<T>> supplier);
 
+  public abstract T get();
+
+  public abstract boolean isPresent();
+
   private static class ResultState<T> extends State<T> {
 
     public final T val;
@@ -56,6 +71,16 @@ public abstract class State<T> {
     @Override
     public State<T> or(Supplier<State<T>> supplier) {
       return this;
+    }
+
+    @Override
+    public T get() {
+      return val;
+    }
+
+    @Override
+    public boolean isPresent() {
+      return true;
     }
   }
 
@@ -76,6 +101,16 @@ public abstract class State<T> {
     @Override
     public State<T> or(Supplier<State<T>> supplier) {
       return supplier.get();
+    }
+
+    @Override
+    public T get() {
+      return null;
+    }
+
+    @Override
+    public boolean isPresent() {
+      return false;
     }
   }
 }

@@ -1,18 +1,20 @@
 package com.honeycomb.parsers;
 
 import com.honeycomb.State;
-import com.honeycomb.ParserException;
 
-public class MaybeParser implements Parser {
+import java.util.Optional;
 
-  private final Parser parser;
+public class MaybeParser<T> implements Parser<Optional<T>> {
+
+  private final Parser<T> parser;
   
-  public MaybeParser(Parser parser) {
+  public MaybeParser(Parser<T> parser) {
     this.parser = parser;
   }
   
-  public State parse(State state, String value) {
-    final var newState = parser.parse(state, value);
-    return newState.isValid() ? newState : state;
+  public <S> State<Optional<T>> parse(State<S> state, String value) {
+    return parser.parse(state, value)
+            .map(Optional::of)
+            .or(() -> state.map(_v -> Optional.empty()));
   }
 }
