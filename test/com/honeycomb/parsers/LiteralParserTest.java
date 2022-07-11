@@ -20,4 +20,13 @@ class LiteralParserTest {
         final var state = parser.parse("Test");
         assertFalse(state.isPresent());
     }
+
+    @Test
+    void parseAndMap() {
+        record IdNode(String id) {}
+        final var parser = new LiteralParser("test").map(IdNode::new);
+        final var state = parser.parse("test");
+        assertTrue(state.isPresent());
+        assertEquals(new IdNode("test"), state.get());
+    }
 }
