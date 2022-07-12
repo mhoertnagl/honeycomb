@@ -18,8 +18,8 @@ public class AnyParser<T> implements Parser<T> {
     return Arrays.stream(parsers).reduce(
             state.error("Alternatives exhausted"),
             // TODO: Undertyped.
-            // (s, p) -> s.or(() -> (State<T>) p.parse(state, value)),
-            (s, p) -> s.or(() -> p.parse(state, value)),
+            (s, p) -> s.or(() -> (State<T>) p.parse(state, value)),
+            // (s, p) -> s.or(() -> p.parse(state, value)),
             (_a, _b) -> null
     );
   }
