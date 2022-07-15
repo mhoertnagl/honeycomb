@@ -1,6 +1,6 @@
 package com.honeycomb;
 
-import com.honeycomb.funs.Fun2;
+import com.honeycomb.funs.*;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,7 +22,18 @@ public abstract class State<T> {
           State<T2> s2,
           Fun2<T1, T2, R> fun) {
     if (s1.isPresent() && s2.isPresent()) {
-      fun.apply(s1.get(), s2.get());
+      return fun.apply(s1.get(), s2.get());
+    }
+    return null;
+  }
+
+  public static <T1,T2, T3, R> R whenAll(
+          State<T1> s1,
+          State<T2> s2,
+          State<T3> s3,
+          Fun3<T1, T2, T3, R> fun) {
+    if (s1.isPresent() && s2.isPresent()) {
+      return fun.apply(s1.get(), s2.get(), s3.get());
     }
     return null;
   }
