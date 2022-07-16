@@ -23,11 +23,7 @@ public final class Optionals {
     }
 
     public static <T> Optional<T> any(List<Optional<T>> es) {
-        return es.stream().reduce(
-                Optional.<T>empty(),
-                Optionals::or,
-                nullBinOp()
-        );
+        return es.stream().reduce(Optional.empty(), Optionals::or, nullBinOp());
     }
 
     public static <A,B> Function<Optional<A>, Optional<B>> lift(Function<A, B> f) {

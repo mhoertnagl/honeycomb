@@ -32,7 +32,7 @@ public abstract class State<T> {
           State<T2> s2,
           State<T3> s3,
           Fun3<T1, T2, T3, R> fun) {
-    if (s1.isPresent() && s2.isPresent()) {
+    if (s1.isPresent() && s2.isPresent() && s3.isPresent()) {
       return fun.apply(s1.get(), s2.get(), s3.get());
     }
     return null;
@@ -60,6 +60,8 @@ public abstract class State<T> {
 
   public abstract <U> State<U> map(Function<? super T, ? extends U> mapping);
 
+  public abstract <S,U> State<U> map2(Function<State<T>, State<S>> that, Fun2<? super T, ? super S, ? extends U> mapping);
+
   public abstract State<T> or(Supplier<State<T>> supplier);
 
   public abstract T get();
@@ -78,6 +80,15 @@ public abstract class State<T> {
     @Override
     public <U> State<U> map(Function<? super T, ? extends U> mapping) {
       return new ResultState<>(pos, row, col, mapping.apply(val));
+    }
+
+    @Override
+    public <S, U> State<U> map2(Function<State<T>, State<S>> that, Fun2<? super T, ? super S, ? extends U> mapping) {
+      final var s = that.apply(this);
+      if (s.isPresent()) {
+        return new ResultState<>(s.pos, s.row, s.col, mapping.apply(val, s.get()));
+      }
+      return s.error("Mismatch");
     }
 
     @Override
@@ -107,6 +118,11 @@ public abstract class State<T> {
 
     @Override
     public <U> State<U> map(Function<? super T, ? extends U> mapping) {
+      return new ErrorState<>(pos, row, col, err);
+    }
+
+    @Override
+    public <S, U> State<U> map2(Function<State<T>, State<S>> that, Fun2<? super T, ? super S, ? extends U> mapping) {
       return new ErrorState<>(pos, row, col, err);
     }
 
