@@ -1,7 +1,5 @@
 package com.honeycomb;
 
-import com.honeycomb.funs.*;
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -39,8 +37,6 @@ public abstract class State<T> {
 
     public abstract <U> State<U> map(Function<? super T, ? extends U> mapping);
 
-//  public abstract <S,U> State<U> map2(Function<State<T>, State<S>> that, Fun2<? super T, ? super S, ? extends U> mapping);
-
     public abstract <U> State<U> flatMap(Function<? super T, ? extends State<U>> mapping);
 
     public abstract State<T> or(Supplier<State<T>> supplier);
@@ -62,15 +58,6 @@ public abstract class State<T> {
         public <U> State<U> map(Function<? super T, ? extends U> mapping) {
             return new ResultState<>(pos, row, col, mapping.apply(val));
         }
-
-//    @Override
-//    public <S, U> State<U> map2(Function<State<T>, State<S>> that, Fun2<? super T, ? super S, ? extends U> mapping) {
-//      final var s = that.apply(this);
-//      if (s.isPresent()) {
-//        return new ResultState<>(s.pos, s.row, s.col, mapping.apply(val, s.get()));
-//      }
-//      return s.error("Mismatch");
-//    }
 
         public <U> State<U> flatMap(Function<? super T, ? extends State<U>> mapping) {
             return mapping.apply(val);
@@ -105,11 +92,6 @@ public abstract class State<T> {
         public <U> State<U> map(Function<? super T, ? extends U> mapping) {
             return new ErrorState<>(pos, row, col, err);
         }
-
-//    @Override
-//    public <S, U> State<U> map2(Function<State<T>, State<S>> that, Fun2<? super T, ? super S, ? extends U> mapping) {
-//      return new ErrorState<>(pos, row, col, err);
-//    }
 
         public <U> State<U> flatMap(Function<? super T, ? extends State<U>> mapping) {
             return new ErrorState<>(pos, row, col, err);
