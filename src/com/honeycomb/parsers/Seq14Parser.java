@@ -1,10 +1,10 @@
 package com.honeycomb.parsers;
 
 import com.honeycomb.State;
-import com.honeycomb.funs.Fun14;
-import com.honeycomb.tuples.Tuples;
+import com.fundamentals.funs.Fun14;
+import com.fundamentals.Tuples;
 
-import static com.honeycomb.tuples.Tuples.tuple;
+import static com.fundamentals.Tuples.tuple;
 
 public record Seq14Parser<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
         Parser<T1> p1,

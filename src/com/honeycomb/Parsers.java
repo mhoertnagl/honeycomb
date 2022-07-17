@@ -1,19 +1,25 @@
 package com.honeycomb;
 
+import com.fundamentals.Prelude;
 import com.honeycomb.parsers.*;
-import com.honeycomb.tuples.Tuples.*;
 
 import java.util.*;
 
 public class Parsers {
 
-    public static <U> Parser<U> WS() {
-        return skip(regex("\\p{Z}*"));
-    }
+    public static final Parser<String> WS =  regex("\\p{Z}*");
 
-    public static <U> Parser<U> KW(String pattern) {
-        return skip(literal(pattern));
-    }
+//    public static Parser<String> WS() {
+//        return regex("\\p{Z}*");
+//    }
+
+//    public static <U> Parser<U> WS() {
+//        return skip(regex("\\p{Z}*"));
+//    }
+
+//    public static <U> Parser<U> KW(String pattern) {
+//        return skip(literal(pattern));
+//    }
 
     public static Parser<String> literal(String pattern) {
         return new LiteralParser(pattern);
@@ -259,6 +265,8 @@ public class Parsers {
         return new SeqParser<>(parser, parsers);
     }
 
+    // TODO: wseq(..) for whitespaced sequences.
+
     @SafeVarargs
     public static <T> Parser<T> any(Parser<T>... parsers) {
         return new AnyParser<>(parsers);
@@ -269,7 +277,7 @@ public class Parsers {
     }
 
     public static <T> Parser<List<T>> many1(Parser<T> parser) {
-        return seq(parser, many(parser)).map(Parsers::prepend);
+        return seq(parser, many(parser)).map(Prelude::prepend);
     }
 
     public static <T> Parser<Optional<T>> maybe(Parser<T> parser) {
@@ -281,12 +289,7 @@ public class Parsers {
     }
 
     public static <S, T> Parser<Optional<List<T>>> list(Parser<S> delimiter, Parser<T> arg) {
-        return maybe(seq(arg, many(seq(delimiter, arg)._2())).map(Parsers::prepend));
-    }
-
-    private static <T> List<T> prepend(T v, List<T> list) {
-        list.add(0, v);
-        return list;
+        return maybe(seq(arg, many(seq(delimiter, arg)._2())).map(Prelude::prepend));
     }
 }
 

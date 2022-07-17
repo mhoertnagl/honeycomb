@@ -1,4 +1,4 @@
-package com.honeycomb.funs;
+package com.fundamentals.funs;
 
 @FunctionalInterface
 public interface Fun2<T1, T2, R> {

@@ -1,4 +1,4 @@
-package com.honeycomb.tuples;
+package com.fundamentals;
 
 public abstract class Tuples {
 

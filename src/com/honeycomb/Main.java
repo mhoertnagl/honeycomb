@@ -1,87 +1,81 @@
 package com.honeycomb;
 
-import com.honeycomb.funs.Fun2;
-import com.honeycomb.parsers.Parser;
-import com.honeycomb.parsers.Seq2Parser;
-import com.honeycomb.tuples.Tuples;
-
 import java.util.ArrayList;
 
 import static com.honeycomb.Parsers.*;
-import static com.honeycomb.tuples.Tuples.tuple;
 
 class Main {
     public static void main(String[] args) {
 
-//        interface Node {}
-//        record IdNode(String id) implements Node {}
-//
-//
-//        var ID = regex("[a-zA-Z][a-zA-Z0-9]");
-//
-//        var statement = any(
-//                ID.map(IdNode::new)
-//        );
-//
-//        var statements = many(seq(
-//                statement,
-//                WS(),
-//                KW(";"),
-//                WS()
-//        ));
-//
-//        var methodArgs = seq(
-//                KW("("),
-//                WS(),
-//                list(",", ID),
-//                WS(),
-//                KW(")"),
-//                WS()
-//        );
-//
-//        var methodBody = seq(
-//                KW("{"),
-//                WS(),
-//                statements,
-//                KW("}"),
-//                WS()
-//        );
-//
-//        var methodDef = seq(
-//                KW("def"),
-//                WS(),
-//                ID,
-//                WS(),
-//                methodArgs,
-//                methodBody,
-//                WS()
-//        );
-//
-//        var classBody = seq(
-//                KW("{"),
-//                WS(),
-//                many(methodDef),
-//                KW("}"),
-//                WS()
-//        );
-//
-//        var classDef = seq(
-//                WS(),
-//                KW("class"),
-//                WS(),
-//                ID,
-//                WS(),
-//                classBody
-//        );
-//
-//        final var res = classDef.parse("class A { def main() {} }");
-//        System.out.println(res);
+        interface Node {}
+        record IdNode(String id) implements Node {}
+
+
+        var ID = regex("[a-zA-Z][a-zA-Z0-9]");
+
+        var statement = any(
+                ID.map(IdNode::new)
+        );
+
+        var statements = many(seq(
+                statement,
+                WS,
+                literal(";"),
+                WS
+        ));
+
+        var methodArgs = seq(
+                literal("("),
+                WS,
+                list(",", ID),
+                WS,
+                literal(")"),
+                WS
+        );
+
+        var methodBody = seq(
+                literal("{"),
+                WS,
+                statements,
+                literal("}"),
+                WS
+        );
+
+        var methodDef = seq(
+                literal("def"),
+                WS,
+                ID,
+                WS,
+                methodArgs,
+                methodBody,
+                WS
+        );
+
+        var classBody = seq(
+                literal("{"),
+                WS,
+                many(methodDef),
+                literal("}"),
+                WS
+        );
+
+        var classDef = seq(
+                WS,
+                literal("class"),
+                WS,
+                ID,
+                WS,
+                classBody
+        );
+
+        final var res = classDef.parse("class A { def main() {} }");
+        System.out.println(res);
 
         // buildFuns(4, 16);
         // buildWhenAll(4, 16);
         // buildTuples(1, 16);
         // buildSeqParsers(2, 16);
-        buildParserShorthand(3, 16);
+        // buildParserShorthand(3, 16);
     }
 
     private static void buildFuns(int begin, int end) {

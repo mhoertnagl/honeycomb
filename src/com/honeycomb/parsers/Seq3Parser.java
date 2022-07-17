@@ -1,10 +1,10 @@
 package com.honeycomb.parsers;
 
 import com.honeycomb.State;
-import com.honeycomb.funs.Fun3;
-import com.honeycomb.tuples.Tuples;
+import com.fundamentals.funs.Fun3;
+import com.fundamentals.Tuples;
 
-import static com.honeycomb.tuples.Tuples.tuple;
+import static com.fundamentals.Tuples.tuple;
 
 public record Seq3Parser<T1, T2, T3>(
         Parser<T1> p1,

@@ -2,7 +2,7 @@ package com.honeycomb.parsers;
 
 import org.junit.jupiter.api.Test;
 
-import static com.honeycomb.tuples.Tuples.tuple;
+import static com.fundamentals.Tuples.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 
 class Seq2ParserTest {
