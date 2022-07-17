@@ -14,8 +14,21 @@ public class SeqParser<T> implements Parser<T[]> {
     this.parser = parser;
     this.parsers = parsers;
   }
-  
+
+  @Override
+  @SuppressWarnings("unchecked")
   public <S> State<T[]> parse(State<S> state, String value) {
+    var list = new ArrayList<T>();
+    var curState = parser.parse(state, value);
+    list.add(curState.get());
+    for (var parser: parsers) {
+      curState = parser.parse(curState, value);
+      list.add(curState.get());
+    }
+    return State.result(curState.pos, curState.row, curState.col, (T[]) list.toArray());
+  }
+}
+
 //    return Arrays.stream(parsers).reduce(
 //            State.result(state.pos, state.row, state.col, new ArrayList<T>()),
 //            (s, p) -> {
@@ -26,18 +39,3 @@ public class SeqParser<T> implements Parser<T[]> {
 //            },
 //            (_a, _b) -> null
 //    );
-    var list = new ArrayList<T>();
-    var curState = parser.parse(state, value);
-    list.add(curState.get());
-    for (var parser: parsers) {
-      curState = parser.parse(curState, value);
-      list.add(curState.get());
-    }
-//    for (var i = 1; i < parsers.length; i++) {
-//      final var parser = parsers[i];
-//      curState = parser.parse(curState, value);
-//      list.add(curState.get());
-//    }
-    return State.result(curState.pos, curState.row, curState.col, (T[]) list.toArray());
-  }
-}
