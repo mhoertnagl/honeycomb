@@ -3,6 +3,7 @@ package com.honeycomb.parsers;
 import com.honeycomb.State;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class SeqParser<T> implements Parser<T[]> {
 
@@ -13,6 +14,12 @@ public class SeqParser<T> implements Parser<T[]> {
   public SeqParser(Parser<T> parser, Parser<T>... parsers) {
     this.parser = parser;
     this.parsers = parsers;
+  }
+
+  @SuppressWarnings("unchecked")
+  public SeqParser(Parser<T> parser, Collection<Parser<T>> parsers) {
+    this.parser = parser;
+    this.parsers = (Parser<T>[]) parsers.toArray();
   }
 
   @Override

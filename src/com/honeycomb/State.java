@@ -77,6 +77,11 @@ public abstract class State<T> {
         public boolean isPresent() {
             return true;
         }
+
+        @Override
+        public String toString() {
+            return val.toString();
+        }
     }
 
     private static class ErrorState<T> extends State<T> {
@@ -110,6 +115,11 @@ public abstract class State<T> {
         @Override
         public boolean isPresent() {
             return false;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%d:%d  %s", row, col, err);
         }
     }
 }
