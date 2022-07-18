@@ -13,6 +13,8 @@ public class Parsers {
 
     public static final Parser<String> WS = regex("\\p{Z}*");
 
+    public static final Parser<String> UID = regex("[\\p{L}][\\p{L}\\p{Nd}]*");
+
     public static Parser<String> literal(String pattern) {
         return new LiteralParser(pattern);
     }

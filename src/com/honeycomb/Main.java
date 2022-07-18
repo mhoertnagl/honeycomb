@@ -22,9 +22,6 @@ class Main {
                 List<MethodNode> methods
         ) {}
 
-
-        var ID = regex("[a-zA-Z][a-zA-Z0-9]*");
-
         var statement = any(
         ).map(v -> new StatementNode());
 
@@ -35,7 +32,7 @@ class Main {
 
         var methodArgs = wseq(
                 literal("("),
-                list(",", ID),
+                list(",", UID),
                 literal(")")
         )._2();
 
@@ -47,7 +44,7 @@ class Main {
 
         var methodDef = wseq(
                 literal("def"),
-                ID,
+                UID,
                 methodArgs,
                 methodBody
         ).map((_def, id, args, body) -> new MethodNode(id, args, body));
@@ -60,7 +57,7 @@ class Main {
 
         var parser = wseq(
                 literal("class"),
-                ID,
+                UID,
                 classBody
         ).map((_class, id, methods) -> new ClassNode(id, methods));
 
