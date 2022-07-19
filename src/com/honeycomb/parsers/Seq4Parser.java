@@ -1,8 +1,8 @@
 package com.honeycomb.parsers;
 
-import com.honeycomb.State;
-import com.fundamentals.funs.Fun4;
 import com.fundamentals.Tuples;
+import com.fundamentals.funs.Fun4;
+import com.honeycomb.State;
 
 import static com.fundamentals.Tuples.tuple;
 
@@ -15,14 +15,32 @@ public record Seq4Parser<T1, T2, T3, T4>(
     @Override
     public <S> State<Tuples.Tuple4<T1, T2, T3, T4>> parse(State<S> state, String value) {
         final var s1 = p1.parse(state, value);
+        if (s1.isError()) {
+            return s1.map(v -> null);
+        }
+
         final var s2 = p2.parse(s1, value);
+        if (s2.isError()) {
+            return s2.map(v -> null);
+        }
+
         final var s3 = p3.parse(s2, value);
+        if (s3.isError()) {
+            return s3.map(v -> null);
+        }
+
         final var s4 = p4.parse(s3, value);
-        return s1.flatMap(_1 ->
-                s2.flatMap(_2 ->
-                        s3.flatMap(_3 ->
-                                s4.map(_4 -> tuple(_1, _2, _3, _4)
-                                ))));
+        if (s4.isError()) {
+            return s4.map(v -> null);
+        }
+
+        return s4.map(v -> tuple(
+                s1.get(),
+                s2.get(),
+                s3.get(),
+                s4.get()
+        ));
+
     }
 
     public <U> Parser<U> map(Fun4<T1, T2, T3, T4, U> mapping) {

@@ -7,6 +7,24 @@ import java.util.Optional;
 
 import static com.honeycomb.Parsers.*;
 
+/**
+ * GRAMMAR :
+ *   'grammar' ID ';'
+ *   RULE* ;
+ *
+ * RULE : ID ':' ALTS ';' ;
+ *
+ * ALTS : PROD ('|' PROD)* ;
+ *
+ * PROD : TERM+ ACTION?
+ *
+ * TERM : ID
+ *      | TERMINAL
+ *      ;
+ *
+ * ACTION : '->' '{{' .* '}}'
+ */
+
 class Main {
     public static void main(String[] argv) {
 
@@ -22,8 +40,8 @@ class Main {
         record MethodNode(
                 String id,
                 Optional<List<String>> args,
-                // List<? extends Statement> body
-                List<?> body
+                List<? extends Statement> body
+                //List<?> body
         ) {}
 
         record ClassNode(
@@ -55,12 +73,12 @@ class Main {
                 literal("var"),
                 UID,
                 literal("="),
-                termRef,
+                NUM.map(NumExpr::new),
                 literal(";")
         ).map((_1, id, _3, value, _5) -> new AssignmentStatement(id, value));
 
         var statement = any(
-                // assignment
+                assignment
         );
 
         var statements = many(statement);
@@ -96,7 +114,7 @@ class Main {
                 classBody
         ).map((_class, id, methods) -> new ClassNode(id, methods));
 
-        final var res = parser.parse("class A { def main() { } }");
+        final var res = parser.parse("class A { def main() { var x = 1; } }");
         System.out.println(res);
     }
 }

@@ -1,8 +1,8 @@
 package com.honeycomb.parsers;
 
-import com.honeycomb.State;
-import com.fundamentals.funs.Fun9;
 import com.fundamentals.Tuples;
+import com.fundamentals.funs.Fun9;
+import com.honeycomb.State;
 
 import static com.fundamentals.Tuples.tuple;
 
@@ -20,24 +20,62 @@ public record Seq9Parser<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
     @Override
     public <S> State<Tuples.Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> parse(State<S> state, String value) {
         final var s1 = p1.parse(state, value);
+        if (s1.isError()) {
+            return s1.map(v -> null);
+        }
+
         final var s2 = p2.parse(s1, value);
+        if (s2.isError()) {
+            return s2.map(v -> null);
+        }
+
         final var s3 = p3.parse(s2, value);
+        if (s3.isError()) {
+            return s3.map(v -> null);
+        }
+
         final var s4 = p4.parse(s3, value);
+        if (s4.isError()) {
+            return s4.map(v -> null);
+        }
+
         final var s5 = p5.parse(s4, value);
+        if (s5.isError()) {
+            return s5.map(v -> null);
+        }
+
         final var s6 = p6.parse(s5, value);
+        if (s6.isError()) {
+            return s6.map(v -> null);
+        }
+
         final var s7 = p7.parse(s6, value);
+        if (s7.isError()) {
+            return s7.map(v -> null);
+        }
+
         final var s8 = p8.parse(s7, value);
+        if (s8.isError()) {
+            return s8.map(v -> null);
+        }
+
         final var s9 = p9.parse(s8, value);
-        return s1.flatMap(_1 ->
-                s2.flatMap(_2 ->
-                        s3.flatMap(_3 ->
-                                s4.flatMap(_4 ->
-                                        s5.flatMap(_5 ->
-                                                s6.flatMap(_6 ->
-                                                        s7.flatMap(_7 ->
-                                                                s8.flatMap(_8 ->
-                                                                        s9.map(_9 -> tuple(_1, _2, _3, _4, _5, _6, _7, _8, _9)
-                                                                        )))))))));
+        if (s9.isError()) {
+            return s9.map(v -> null);
+        }
+
+        return s9.map(v -> tuple(
+                s1.get(),
+                s2.get(),
+                s3.get(),
+                s4.get(),
+                s5.get(),
+                s6.get(),
+                s7.get(),
+                s8.get(),
+                s9.get()
+        ));
+
     }
 
     public <U> Parser<U> map(Fun9<T1, T2, T3, T4, T5, T6, T7, T8, T9, U> mapping) {

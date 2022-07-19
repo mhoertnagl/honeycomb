@@ -1,10 +1,9 @@
 package com.honeycomb.parsers;
 
+import com.fundamentals.funs.*;
 import com.honeycomb.State;
-import com.fundamentals.funs.Fun2;
-import com.fundamentals.Tuples.*;
 
-import static com.fundamentals.Tuples.tuple;
+import static com.fundamentals.Tuples.*;
 
 public record Seq2Parser<T1, T2>(
         Parser<T1> p1,
@@ -26,6 +25,7 @@ public record Seq2Parser<T1, T2>(
                 s1.get(),
                 s2.get()
         ));
+
     }
 
     public <U> Parser<U> map(Fun2<T1, T2, U> mapping) {
