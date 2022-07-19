@@ -1,5 +1,7 @@
 package com.honeycomb;
 
+import com.honeycomb.parsers.Parser;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -7,28 +9,64 @@ import java.util.Optional;
 import static com.honeycomb.Parsers.*;
 
 class Main {
+
+    interface Expr {}
+
+    record NumExpr(Integer num) implements Expr {}
+    record BinOpExpr(Expr left, String op, Expr right) implements Expr {}
+
+    record StatementNode() {}
+
+    record MethodNode(
+            String id,
+            Optional<List<String>> args,
+            List<StatementNode> body
+    ) {}
+
+    record ClassNode(
+            String id,
+            List<MethodNode> methods
+    ) {}
+
+    static Parser<Integer> NUM = regex("[0-9]+").map(Integer::parseInt);
+
+    static Parser<Expr> factor() {
+        return any(
+                wseq(primary, literal("*"), factor).map(BinOpExpr::new),
+                wseq(primary, literal("/"), factor).map(BinOpExpr::new)
+        );
+    }
+
     public static void main(String[] argv) {
 
-        record StatementNode() {}
+        var primary = any(
+                NUM.map(NumExpr::new),
+                wseq(literal("("), term, literal(")"))._2()
+        );
 
-        record MethodNode(
-                String id,
-                Optional<List<String>> args,
-                List<StatementNode> body
-        ) {}
+        var factor = any(
+                wseq(primary, literal("*"), factor).map(BinOpExpr::new),
+                wseq(primary, literal("/"), factor).map(BinOpExpr::new)
+        );
 
-        record ClassNode(
-                String id,
-                List<MethodNode> methods
-        ) {}
+        var term = any(
+                wseq(factor, literal("+"), term).map(BinOpExpr::new),
+                wseq(factor, literal("-"), term).map(BinOpExpr::new)
+        );
+
+        var assignment = wseq(
+                literal("var"),
+                UID,
+                literal("="),
+                term,
+                literal(";")
+        );
 
         var statement = any(
+                assignment
         ).map(v -> new StatementNode());
 
-        var statements = many(wseq(
-                statement,
-                literal(";")
-        )._1());
+        var statements = many(statement);
 
         var methodArgs = wseq(
                 literal("("),
