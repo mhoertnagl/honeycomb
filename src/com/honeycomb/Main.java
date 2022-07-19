@@ -8,21 +8,32 @@ import java.util.Optional;
 import static com.honeycomb.Parsers.*;
 
 /**
- * GRAMMAR :
- *   'grammar' ID ';'
- *   RULE* ;
+ * GRAMMAR : HEADER
+ *           CODE
+ *           RULE*
+ *         ;
  *
- * RULE : ID ':' ALTS ';' ;
+ * HEADER  : 'grammar' ID ';'
+ *         ;
  *
- * ALTS : PROD ('|' PROD)* ;
+ * RULE    : ID ':' ALTS ';'
+ *         ;
  *
- * PROD : TERM+ ACTION?
+ * ALTS    : PROD ('|' PROD)*
+ *         ;
  *
- * TERM : ID
- *      | TERMINAL
- *      ;
+ * PROD    : TERM+ ACTION?
+ *         ;
  *
- * ACTION : '->' '{{' .* '}}'
+ * TERM    : ID
+ *         | TERMINAL
+ *         ;
+ *
+ * ACTION  : '->' CODE
+ *         ;
+ *
+ * CODE    : '{{' .* '}}'
+ *         ;
  */
 
 class Main {
