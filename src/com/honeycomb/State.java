@@ -45,6 +45,8 @@ public abstract class State<T> {
 
     public abstract boolean isPresent();
 
+    public abstract boolean isError();
+
     private static class ResultState<T> extends State<T> {
 
         public final T val;
@@ -79,8 +81,13 @@ public abstract class State<T> {
         }
 
         @Override
+        public boolean isError() {
+            return false;
+        }
+
+        @Override
         public String toString() {
-            return val.toString();
+            return val != null ? val.toString() : "";
         }
     }
 
@@ -115,6 +122,11 @@ public abstract class State<T> {
         @Override
         public boolean isPresent() {
             return false;
+        }
+
+        @Override
+        public boolean isError() {
+            return true;
         }
 
         @Override

@@ -1,70 +1,67 @@
 package com.honeycomb;
 
-import com.honeycomb.parsers.Parser;
+import com.honeycomb.parsers.RefParser;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static com.honeycomb.Parsers.*;
 
 class Main {
-
-    interface Expr {}
-
-    record NumExpr(Integer num) implements Expr {}
-    record BinOpExpr(Expr left, String op, Expr right) implements Expr {}
-
-    record StatementNode() {}
-
-    record MethodNode(
-            String id,
-            Optional<List<String>> args,
-            List<StatementNode> body
-    ) {}
-
-    record ClassNode(
-            String id,
-            List<MethodNode> methods
-    ) {}
-
-    static Parser<Integer> NUM = regex("[0-9]+").map(Integer::parseInt);
-
-    static Parser<Expr> factor() {
-        return any(
-                wseq(primary, literal("*"), factor).map(BinOpExpr::new),
-                wseq(primary, literal("/"), factor).map(BinOpExpr::new)
-        );
-    }
-
     public static void main(String[] argv) {
+
+        interface Expr {}
+
+        record NumExpr(Integer num) implements Expr {}
+        record BinOpExpr(Expr left, String op, Expr right) implements Expr {}
+
+        interface Statement {}
+
+        record AssignmentStatement(String id, Expr value) implements Statement {}
+
+        record MethodNode(
+                String id,
+                Optional<List<String>> args,
+                // List<? extends Statement> body
+                List<?> body
+        ) {}
+
+        record ClassNode(
+                String id,
+                List<MethodNode> methods
+        ) {}
+
+        var NUM = regex("[0-9]+").map(Integer::parseInt);
+
+        RefParser<Expr> factorRef = ref();
+        RefParser<Expr> termRef = ref();
 
         var primary = any(
                 NUM.map(NumExpr::new),
-                wseq(literal("("), term, literal(")"))._2()
+                wseq(literal("("), termRef, literal(")"))._2()
         );
 
-        var factor = any(
-                wseq(primary, literal("*"), factor).map(BinOpExpr::new),
-                wseq(primary, literal("/"), factor).map(BinOpExpr::new)
-        );
+        factorRef.set(() -> any(
+                wseq(primary, literal("*"), factorRef).map(BinOpExpr::new),
+                wseq(primary, literal("/"), factorRef).map(BinOpExpr::new)
+        ));
 
-        var term = any(
-                wseq(factor, literal("+"), term).map(BinOpExpr::new),
-                wseq(factor, literal("-"), term).map(BinOpExpr::new)
-        );
+        termRef.set(() -> any(
+                wseq(factorRef, literal("+"), termRef).map(BinOpExpr::new),
+                wseq(factorRef, literal("-"), termRef).map(BinOpExpr::new)
+        ));
 
         var assignment = wseq(
                 literal("var"),
                 UID,
                 literal("="),
-                term,
+                termRef,
                 literal(";")
-        );
+        ).map((_1, id, _3, value, _5) -> new AssignmentStatement(id, value));
 
         var statement = any(
-                assignment
-        ).map(v -> new StatementNode());
+                // assignment
+        );
 
         var statements = many(statement);
 
@@ -99,7 +96,7 @@ class Main {
                 classBody
         ).map((_class, id, methods) -> new ClassNode(id, methods));
 
-        final var res = parser.parse("class A { def main() {} }");
+        final var res = parser.parse("class A { def main() { } }");
         System.out.println(res);
     }
 }

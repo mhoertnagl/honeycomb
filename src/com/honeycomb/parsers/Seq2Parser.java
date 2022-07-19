@@ -13,10 +13,19 @@ public record Seq2Parser<T1, T2>(
     @Override
     public <S> State<Tuple2<T1, T2>> parse(State<S> state, String value) {
         final var s1 = p1.parse(state, value);
+        if (s1.isError()) {
+            return s1.map(v -> null);
+        }
+
         final var s2 = p2.parse(s1, value);
-        return s1.flatMap(_1 ->
-                s2.map(_2 -> tuple(_1, _2)
-                ));
+        if (s2.isError()) {
+            return s2.map(v -> null);
+        }
+
+        return s2.map(v -> tuple(
+                s1.get(),
+                s2.get()
+        ));
     }
 
     public <U> Parser<U> map(Fun2<T1, T2, U> mapping) {
