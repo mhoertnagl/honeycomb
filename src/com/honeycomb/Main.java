@@ -61,22 +61,22 @@ class Main {
 
     class Lang {
 
-        static Parser<Expr> primary = any(
+        private static final Parser<Expr> primary = any(
                 INT.map(NumExpr::new),
                 wseq(literal("("), Lang.factor, literal(")"))._2()
         );
 
-        static Parser<Expr> factor = any(
+        private static final Parser<Expr> factor = any(
                 wseq(primary, literal("*"), Lang.factor).map(BinOpExpr::new),
                 wseq(primary, literal("/"), Lang.factor).map(BinOpExpr::new)
         );
 
-        static Parser<Expr> term = any(
+        private static final Parser<Expr> term = any(
                 wseq(Lang.factor, literal("+"), Lang.term).map(BinOpExpr::new),
                 wseq(Lang.factor, literal("-"), Lang.term).map(BinOpExpr::new)
         );
 
-        static Parser<Statement> assignment = wseq(
+        private static final Parser<Statement> assignment = wseq(
                 literal("var"),
                 UID,
                 literal("="),
@@ -84,38 +84,36 @@ class Main {
                 literal(";")
         ).map((_1, id, _3, value, _5) -> new AssignmentStatement(id, value));
 
-        static Parser<Statement> statement = any(
-                assignment
-        );
+        private static final Parser<Statement> statement = any(assignment);
 
-        static Parser<List<Statement>> statements = many(statement);
+        private static final Parser<List<Statement>> statements = many(statement);
 
-        static Parser<Optional<List<String>>> methodArgs = wseq(
+        private static final Parser<Optional<List<String>>> methodArgs = wseq(
                 literal("("),
                 list(",", UID),
                 literal(")")
         )._2();
 
-        static Parser<List<Statement>> methodBody = wseq(
+        private static final Parser<List<Statement>> methodBody = wseq(
                 literal("{"),
                 statements,
                 literal("}")
         )._2();
 
-        static Parser<MethodNode> methodDef = wseq(
+        private static final Parser<MethodNode> methodDef = wseq(
                 literal("def"),
                 UID,
                 methodArgs,
                 methodBody
         ).map((_def, id, args, body) -> new MethodNode(id, args, body));
 
-        static Parser<List<MethodNode>> classBody = wseq(
+        private static final Parser<List<MethodNode>> classBody = wseq(
                 literal("{"),
                 many(methodDef),
                 literal("}")
         )._2();
 
-        static Parser<ClassNode> parser = wseq(
+        private static final Parser<ClassNode> parser = wseq(
                 literal("class"),
                 UID,
                 classBody
