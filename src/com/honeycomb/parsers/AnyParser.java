@@ -14,10 +14,10 @@ public class AnyParser<T> implements Parser<T> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <S> State<T> parse(State<S> state, String value) {
     return Arrays.stream(parsers).reduce(
             state.error("Alternatives exhausted"),
-            // TODO: Undertyped.
             (s, p) -> s.or(() -> (State<T>) p.parse(state, value)),
             // (s, p) -> s.or(() -> p.parse(state, value)),
             (_a, _b) -> null

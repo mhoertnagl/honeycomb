@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class Parsers {
@@ -16,16 +15,14 @@ public class Parsers {
 
     public static final Parser<String> UID = regex("[\\p{L}][\\p{L}\\p{Nd}]*");
 
+    public static final Parser<Integer> INT = regex("[+-]?[0-9]+").map(Integer::parseInt);
+
     public static Parser<String> literal(String pattern) {
         return new LiteralParser(pattern);
     }
 
     public static Parser<String> regex(String pattern) {
         return new RegexParser(pattern);
-    }
-
-    public static <T> RefParser<T> ref() {
-        return new RefParser<>();
     }
 
     public static <T1, T2>

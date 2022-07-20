@@ -1,6 +1,6 @@
 package com.honeycomb;
 
-import com.honeycomb.parsers.RefParser;
+import com.honeycomb.parsers.Parser;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,95 +37,97 @@ import static com.honeycomb.Parsers.*;
  */
 
 class Main {
-    public static void main(String[] argv) {
 
-        interface Expr {}
+    interface Expr {}
 
-        record NumExpr(Integer num) implements Expr {}
-        record BinOpExpr(Expr left, String op, Expr right) implements Expr {}
+    record NumExpr(Integer num) implements Expr {}
+    record BinOpExpr(Expr left, String op, Expr right) implements Expr {}
 
-        interface Statement {}
+    interface Statement {}
 
-        record AssignmentStatement(String id, Expr value) implements Statement {}
+    record AssignmentStatement(String id, Expr value) implements Statement {}
 
-        record MethodNode(
-                String id,
-                Optional<List<String>> args,
-                List<? extends Statement> body
-                //List<?> body
-        ) {}
+    record MethodNode(
+            String id,
+            Optional<List<String>> args,
+            List<? extends Statement> body
+            //List<?> body
+    ) {}
 
-        record ClassNode(
-                String id,
-                List<MethodNode> methods
-        ) {}
+    record ClassNode(
+            String id,
+            List<MethodNode> methods
+    ) {}
 
-        var NUM = regex("[0-9]+").map(Integer::parseInt);
+    class Lang {
 
-        RefParser<Expr> factorRef = ref();
-        RefParser<Expr> termRef = ref();
-
-        var primary = any(
-                NUM.map(NumExpr::new),
-                wseq(literal("("), termRef, literal(")"))._2()
+        static Parser<Expr> primary = any(
+                INT.map(NumExpr::new),
+                wseq(literal("("), Lang.factor, literal(")"))._2()
         );
 
-        factorRef.set(() -> any(
-                wseq(primary, literal("*"), factorRef).map(BinOpExpr::new),
-                wseq(primary, literal("/"), factorRef).map(BinOpExpr::new)
-        ));
+        static Parser<Expr> factor = any(
+                wseq(primary, literal("*"), Lang.factor).map(BinOpExpr::new),
+                wseq(primary, literal("/"), Lang.factor).map(BinOpExpr::new)
+        );
 
-        termRef.set(() -> any(
-                wseq(factorRef, literal("+"), termRef).map(BinOpExpr::new),
-                wseq(factorRef, literal("-"), termRef).map(BinOpExpr::new)
-        ));
+        static Parser<Expr> term = any(
+                wseq(Lang.factor, literal("+"), Lang.term).map(BinOpExpr::new),
+                wseq(Lang.factor, literal("-"), Lang.term).map(BinOpExpr::new)
+        );
 
-        var assignment = wseq(
+        static Parser<Statement> assignment = wseq(
                 literal("var"),
                 UID,
                 literal("="),
-                NUM.map(NumExpr::new),
+                INT.map(NumExpr::new),
                 literal(";")
         ).map((_1, id, _3, value, _5) -> new AssignmentStatement(id, value));
 
-        var statement = any(
+        static Parser<Statement> statement = any(
                 assignment
         );
 
-        var statements = many(statement);
+        static Parser<List<Statement>> statements = many(statement);
 
-        var methodArgs = wseq(
+        static Parser<Optional<List<String>>> methodArgs = wseq(
                 literal("("),
                 list(",", UID),
                 literal(")")
         )._2();
 
-        var methodBody = wseq(
+        static Parser<List<Statement>> methodBody = wseq(
                 literal("{"),
                 statements,
                 literal("}")
         )._2();
 
-        var methodDef = wseq(
+        static Parser<MethodNode> methodDef = wseq(
                 literal("def"),
                 UID,
                 methodArgs,
                 methodBody
         ).map((_def, id, args, body) -> new MethodNode(id, args, body));
 
-        var classBody = wseq(
+        static Parser<List<MethodNode>> classBody = wseq(
                 literal("{"),
                 many(methodDef),
                 literal("}")
         )._2();
 
-        var parser = wseq(
+        static Parser<ClassNode> parser = wseq(
                 literal("class"),
                 UID,
                 classBody
         ).map((_class, id, methods) -> new ClassNode(id, methods));
 
-        final var res = parser.parse("class A { def main() { var x = 1; } }");
+        public static State<? extends ClassNode> parse(String source) {
+            return parser.parse(source);
+        }
+    }
+
+    public static void main(String[] argv) {
+        var res = Lang.parse("class A { def main() { var x = -1; } }");
         System.out.println(res);
     }
 }
