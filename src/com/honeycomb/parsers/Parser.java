@@ -3,6 +3,7 @@ package com.honeycomb.parsers;
 import com.honeycomb.State;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface Parser<T> {
   

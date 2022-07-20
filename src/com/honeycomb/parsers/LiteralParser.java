@@ -15,8 +15,7 @@ public class LiteralParser implements Parser<String> {
     final var plen = pattern.length();
     final var vlen = value.length();
     final var pos = state.pos;
-    if (pos < vlen
-            && value.substring(pos).startsWith(pattern)) {
+    if (pos < vlen && value.substring(pos).startsWith(pattern)) {
       return State.result(pos + plen, state.row, state.col + plen, pattern);
     }
     return state.error("Expected [%s]", pattern);

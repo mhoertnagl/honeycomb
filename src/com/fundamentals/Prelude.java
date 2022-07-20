@@ -1,6 +1,8 @@
 package com.fundamentals;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 
 public class Prelude {
 
@@ -31,4 +33,8 @@ public class Prelude {
 //        es.addAll(fs);
 //        return es;
 //    }
+
+    public static <T, U> U reduce(T[] list, U identity, BiFunction<U, ? super T, U> accumulator) {
+        return Arrays.stream(list).reduce(identity, accumulator, (_a, _b) -> null);
+    }
 }

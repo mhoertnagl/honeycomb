@@ -1,8 +1,7 @@
 package com.honeycomb.parsers;
 
+import com.fundamentals.Prelude;
 import com.honeycomb.State;
-
-import java.util.Arrays;
 
 public class AnyParser<T> implements Parser<T> {
 
@@ -16,11 +15,9 @@ public class AnyParser<T> implements Parser<T> {
   @Override
   @SuppressWarnings("unchecked")
   public <S> State<T> parse(State<S> state, String value) {
-    return Arrays.stream(parsers).reduce(
+    return Prelude.reduce(parsers,
             state.error("Alternatives exhausted"),
-            (s, p) -> s.or(() -> (State<T>) p.parse(state, value)),
-            // (s, p) -> s.or(() -> p.parse(state, value)),
-            (_a, _b) -> null
+            (s, p) -> s.or(() -> (State<T>) p.parse(state, value))
     );
   }
 }
