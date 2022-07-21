@@ -3,6 +3,7 @@ package com.honeycomb.shorter;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class Parsers {
@@ -23,6 +24,17 @@ public class Parsers {
 
     public static Parser<String> regex(String pattern) {
         return new RegexParser(pattern);
+    }
+
+    @SafeVarargs
+    public static <T> Parser<T> any(
+            Supplier<Parser<T>> parser,
+            Supplier<Parser<T>>... parsers) {
+        return Arrays.stream(parsers).reduce(
+                parser.get(),
+                (s1, s2) -> s1.or(s2),
+                (_a, _b) -> null
+        );
     }
 
     @SafeVarargs

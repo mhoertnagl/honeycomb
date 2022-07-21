@@ -2,6 +2,7 @@ package com.honeycomb.shorter;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface Parser<T> {
 
@@ -15,18 +16,26 @@ public interface Parser<T> {
         return parse(new Cursor(in, 0)).map(r -> r.val);
     }
 
+    default Parser<Pair<T, String>> then(String pattern) {
+        return then(Parsers.literal(pattern));
+    }
+
+    default <U> Parser<Pair<T, U>> then(Supplier<Parser<U>> that) {
+        return then(that.get());
+    }
+
     default <U> Parser<Pair<T, U>> then(Parser<U> that) {
         return in -> parse(in)
                 .flatMap(rt -> that.parse(rt.cur)
                         .map(ru -> new Result<>(ru.cur, new Pair<>(rt.val, ru.val))));
     }
 
-    default Parser<Pair<T, String>> then(String pattern) {
-        return then(Parsers.literal(pattern));
-    }
-
     default <U> Parser<U> skip(Parser<U> that) {
         return in -> parse(in).flatMap(rt -> that.parse(rt.cur));
+    }
+
+    default Parser<T> or(Supplier<Parser<T>> that) {
+        return in -> parse(in).or(() -> that.get().parse(in));
     }
 
     default Parser<T> or(Parser<T> that) {
