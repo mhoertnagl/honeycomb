@@ -27,14 +27,8 @@ public class Parsers {
     }
 
     @SafeVarargs
-    public static <T> Parser<T> any(
-            Supplier<Parser<T>> parser,
-            Supplier<Parser<T>>... parsers) {
-        return Arrays.stream(parsers).reduce(
-                parser.get(),
-                (s1, s2) -> s1.or(s2),
-                (_a, _b) -> null
-        );
+    public static <T> Parser<T> any(Supplier<Parser<T>> parser, Supplier<Parser<T>>... parsers) {
+        return Arrays.stream(parsers).reduce(parser.get(), Parser::or, (_a, _b) -> null);
     }
 
     @SafeVarargs
@@ -44,7 +38,7 @@ public class Parsers {
 
     public static <T1, T2, T3, R>
     Function<Pair<Pair<T1, T2>, T3>, R>
-    match(Fun3<T1, T2, T3, R> f) {
+    to(Fun3<T1, T2, T3, R> f) {
         return p -> f.apply(p._1()._1(), p._1()._2(), p._2());
     }
 

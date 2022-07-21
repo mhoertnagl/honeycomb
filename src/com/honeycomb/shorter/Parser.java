@@ -21,7 +21,7 @@ public interface Parser<T> {
     }
 
     default <U> Parser<Pair<T, U>> then(Supplier<Parser<U>> that) {
-        return then(that.get());
+        return in -> then(that.get()).parse(in);
     }
 
     default <U> Parser<Pair<T, U>> then(Parser<U> that) {
@@ -35,7 +35,8 @@ public interface Parser<T> {
     }
 
     default Parser<T> or(Supplier<Parser<T>> that) {
-        return in -> parse(in).or(() -> that.get().parse(in));
+        return in -> or(that.get()).parse(in);
+        // return in -> parse(in).or(() -> that.get().parse(in));
     }
 
     default Parser<T> or(Parser<T> that) {

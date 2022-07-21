@@ -41,21 +41,21 @@ public class Test {
         private static final Parser<Ast.Expr> primary = any(
                 () -> INT.map(Ast.NumExpr::create),
                 () -> UID.map(Ast.VarExpr::create),
-                () -> literal("(").then(Lang.term).then(")").map(take2of3())
+                () -> literal("(").then(() -> Lang.term).then(")").map(take2of3())
                 // TODO: How to skip a parser at the end of the sequence?
                 // literal("(").skip(Lang.term).then(")").map(x -> x._1())
                 // literal("(").skip(Lang.term).then(")").skip(succeed()).map(x -> )
         );
 
         private static final Parser<Ast.Expr> factor = any(
-                () -> Lang.primary.then("*").then(Lang.factor).map(match(Ast.BinOpExpr::create)),
-                () -> Lang.primary.then("/").then(Lang.factor).map(match(Ast.BinOpExpr::create)),
+                () -> Lang.primary.then("*").then(() -> Lang.primary).map(to(Ast.BinOpExpr::create)),
+                () -> Lang.primary.then("/").then(() -> Lang.primary).map(to(Ast.BinOpExpr::create)),
                 () -> Lang.primary
         );
 
         private static final Parser<Ast.Expr> term = any(
-                () -> Lang.factor.then("+").then(Lang.term).map(match(Ast.BinOpExpr::create)),
-                () -> Lang.factor.then("-").then(Lang.term).map(match(Ast.BinOpExpr::create)),
+                () -> Lang.factor.then("+").then(() -> Lang.term).map(to(Ast.BinOpExpr::create)),
+                () -> Lang.factor.then("-").then(() -> Lang.term).map(to(Ast.BinOpExpr::create)),
                 () -> Lang.factor
         );
 
@@ -65,7 +65,7 @@ public class Test {
     }
 
     public static void main(String[] args) {
-        final var expr = Lang.parse("a + 1");
+        final var expr = Lang.parse("a+1*(3+b)");
         System.out.println(expr);
     }
 }
