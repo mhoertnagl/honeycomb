@@ -1,10 +1,12 @@
-package com.fundamentals;
+package com.honeycomb;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 
 public class Prelude {
+
+    public record Tuple<A, B>(A _1, B _2) {}
 
 //    @SafeVarargs
 //    public static <T> List<T> append(List<T> es, T... ts) {
@@ -12,10 +14,10 @@ public class Prelude {
 //        return es;
 //    }
 
-    public static <T> List<T> prepend(T t, List<T> ts) {
-        ts.add(0, t);
-        return ts;
-    }
+//    public static <T> List<T> prepend(T t, List<T> ts) {
+//        ts.add(0, t);
+//        return ts;
+//    }
 
 //    public static <T> List<T> prepend(List<T> ts, T t) {
 //        ts.add(0, t);

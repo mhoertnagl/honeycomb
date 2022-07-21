@@ -1,8 +1,14 @@
-package com.honeycomb.shorter;
+package com.honeycomb;
 
 import java.util.Optional;
 
-import static com.honeycomb.shorter.Parsers.*;
+import static com.honeycomb.Conversions.*;
+import static com.honeycomb.Parsers.*;
+
+// TODO: many, many1, list, list1, maybe
+// TODO: complete conversions.
+// TODO: move functions to Prelude?
+// TODO: error reporting?
 
 public class Test {
 
@@ -41,10 +47,7 @@ public class Test {
         private static final Parser<Ast.Expr> primary = any(
                 () -> INT.map(Ast.NumExpr::create),
                 () -> UID.map(Ast.VarExpr::create),
-                () -> literal("(").then(() -> Lang.term).then(")").map(take2of3())
-                // TODO: How to skip a parser at the end of the sequence?
-                // literal("(").skip(Lang.term).then(")").map(x -> x._1())
-                // literal("(").skip(Lang.term).then(")").skip(succeed()).map(x -> )
+                () -> literal("(").skipLeft(Lang.term).skipRight(")")
         );
 
         private static final Parser<Ast.Expr> factor = any(
