@@ -45,9 +45,9 @@ public class Test {
         // First expression needs a cast to Expr, or else Java will infer
         // NumExpr which is not a superclass of VarExpr.
         private static final Parser<Ast.Expr> primary = any(
-                () -> INT.map(Ast.NumExpr::create),
+                () -> literal("(").skipLeft(Lang.term).skipRight(")"),
                 () -> UID.map(Ast.VarExpr::create),
-                () -> literal("(").skipLeft(Lang.term).skipRight(")")
+                () -> INT.map(Ast.NumExpr::create)
         );
 
         private static final Parser<Ast.Expr> factor = any(
