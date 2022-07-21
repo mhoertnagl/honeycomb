@@ -45,14 +45,14 @@ public class Test {
         // First expression needs a cast to Expr, or else Java will infer
         // NumExpr which is not a superclass of VarExpr.
         private static final Parser<Ast.Expr> primary = any(
-                () -> literal("(").skipLeft(Lang.term).skipRight(")"),
+                () -> literal("(").skipLeft(() -> Lang.term).skipRight(")"),
                 () -> UID.map(Ast.VarExpr::create),
                 () -> INT.map(Ast.NumExpr::create)
         );
 
         private static final Parser<Ast.Expr> factor = any(
-                () -> Lang.primary.then("*").then(() -> Lang.primary).map(to(Ast.BinOpExpr::create)),
-                () -> Lang.primary.then("/").then(() -> Lang.primary).map(to(Ast.BinOpExpr::create)),
+                () -> Lang.primary.then("*").then(() -> Lang.factor).map(to(Ast.BinOpExpr::create)),
+                () -> Lang.primary.then("/").then(() -> Lang.factor).map(to(Ast.BinOpExpr::create)),
                 () -> Lang.primary
         );
 
