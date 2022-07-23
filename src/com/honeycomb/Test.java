@@ -52,7 +52,8 @@ public class Test {
         private static Parser<Ast.Expr> factor() {
              return any(
                     Lang.primary().then("*").then(Lang::factor).map(to(Ast.BinOpExpr::create)),
-                    Lang.primary().then("/").then(Lang::factor).map(to(Ast.BinOpExpr::create)), Lang.primary()
+                    Lang.primary().then("/").then(Lang::factor).map(to(Ast.BinOpExpr::create)),
+                    Lang.primary()
             );
         }
 
