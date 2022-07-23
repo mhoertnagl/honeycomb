@@ -43,25 +43,24 @@ public class Test {
 
         private static Parser<Ast.Expr> primary() {
             return any(
-                    () -> literal("(").skipLeft(Lang::term).skipRight(")"),
-                    () -> UID.map(Ast.VarExpr::create),
-                    () -> INT.map(Ast.NumExpr::create)
+                    literal("(").skipLeft(Lang::term).skipRight(")"),
+                    UID.map(Ast.VarExpr::create),
+                    INT.map(Ast.NumExpr::create)
             );
         }
 
         private static Parser<Ast.Expr> factor() {
              return any(
-                    () -> Lang.primary().then("*").then(Lang::factor).map(to(Ast.BinOpExpr::create)),
-                    () -> Lang.primary().then("/").then(Lang::factor).map(to(Ast.BinOpExpr::create)),
-                    Lang::primary
+                    Lang.primary().then("*").then(Lang::factor).map(to(Ast.BinOpExpr::create)),
+                    Lang.primary().then("/").then(Lang::factor).map(to(Ast.BinOpExpr::create)), Lang.primary()
             );
         }
 
         private static Parser<Ast.Expr> term() {
             return any(
-                    () -> Lang.factor().then("+").then(Lang::term).map(to(Ast.BinOpExpr::create)),
-                    () -> Lang.factor().then("-").then(Lang::term).map(to(Ast.BinOpExpr::create)),
-                    Lang::factor
+                    Lang.factor().then("+").then(Lang::term).map(to(Ast.BinOpExpr::create)),
+                    Lang.factor().then("-").then(Lang::term).map(to(Ast.BinOpExpr::create)),
+                    Lang.factor()
             );
         }
 
