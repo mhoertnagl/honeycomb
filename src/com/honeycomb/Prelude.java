@@ -16,10 +16,10 @@ public class Prelude {
 //        return es;
 //    }
 
-//    public static <T> List<T> prepend(T t, List<T> ts) {
-//        ts.add(0, t);
-//        return ts;
-//    }
+    public static <T> List<T> prepend(T t, List<T> ts) {
+        ts.add(0, t);
+        return ts;
+    }
 
 //    public static <T> List<T> prepend(List<T> ts, T t) {
 //        ts.add(0, t);

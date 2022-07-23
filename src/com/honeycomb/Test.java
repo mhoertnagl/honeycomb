@@ -5,7 +5,8 @@ import java.util.Optional;
 import static com.honeycomb.Conversions.*;
 import static com.honeycomb.Parsers.*;
 
-// TODO: many, many1, list, list1, maybe
+// TODO: Indirection required?
+// TODO: list, list1
 // TODO: move functions to Prelude?
 // TODO: error reporting?
 

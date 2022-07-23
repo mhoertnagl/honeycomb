@@ -27,11 +27,14 @@ public class Parsers {
     }
 
     public static <T> Parser<Optional<T>> maybe(Supplier<Parser<T>> parser) {
-        return cur -> maybe(parser.get()).parse(cur);
+        return maybe(parser.get());
+        // return cur -> maybe(parser.get()).parse(cur);
     }
 
+    // TODO: Does maybe work?
     public static <T> Parser<Optional<T>> maybe(Parser<T> parser) {
-        return cur -> parser.parse(cur).map(r -> r.map(Optional::of));
+        return parser.map(Optional::of);
+        // return cur -> parser.parse(cur).map(r -> r.map(Optional::of));
     }
 
     @SafeVarargs
@@ -45,19 +48,22 @@ public class Parsers {
     }
 
     public static <T> Parser<List<T>> many(Supplier<Parser<T>> parser) {
-        return cur -> many(parser.get()).parse(cur);
+        return many(parser.get());
+        // return cur -> many(parser.get()).parse(cur);
     }
 
     public static <T> Parser<List<T>> many(Parser<T> parser) {
-
+        return new ManyParser<>(parser);
     }
 
     public static <T> Parser<List<T>> many1(Supplier<Parser<T>> parser) {
-        return cur -> many1(parser.get()).parse(cur);
+        return many1(parser.get());
+        // return cur -> many1(parser.get()).parse(cur);
     }
 
     public static <T> Parser<List<T>> many1(Parser<T> parser) {
-
+        return parser.then(many(parser)).map(t -> Prelude.prepend(t._1(), t._2()));
+        // return cur -> parser.then(many(parser)).parse(cur).map(r -> r.map(t -> Prelude.prepend(t._1(), t._2())));
     }
 
     public static class LiteralParser implements Parser<String> {
@@ -118,18 +124,13 @@ public class Parsers {
         @Override
         public Optional<Result<List<T>>> parse(Cursor cur) {
             final var list = new ArrayList<T>();
-            Optional<Result<T>> res = null;
-            do {
+            var res = parser.parse(cur);
+            while (res.isPresent()) {
+                list.add(res.get().val());
+                cur = res.get().cur();
                 res = parser.parse(cur);
-            } while ()
-            final var val = cur.in();
-            final var plen = pattern.length();
-            final var vlen = val.length();
-            final var pos = cur.pos();
-            if (pos < vlen && val.substring(pos).startsWith(pattern)) {
-                return Optional.of(Result.of(cur.advanceBy(plen), pattern));
             }
-            return Optional.empty();
+            return Optional.of(Result.of(cur, list));
         }
     }
 }
