@@ -9,69 +9,82 @@ import static com.honeycomb.Parsers.*;
 
 public interface Parser<T> {
 
-    record Cursor(String in, Integer pos) {}
+    record Cursor(String in, Integer pos) {
 
-    record Result<T>(Cursor cur, T val) {
+        public Cursor advanceBy(Integer offset) {
+            return new Cursor(in, pos + offset);
+        }
 
-        public <U> Result<U> map(Function<T, U> mapping) {
-            return new Result<>(cur, mapping.apply(val));
+        public Cursor positionAt(Integer newPos) {
+            return new Cursor(in, newPos);
         }
     }
 
-    Optional<Result<T>> parse(Cursor in);
+    record Result<T>(Cursor cur, T val) {
+
+        public static <U> Result<U> of(Cursor cur, U val) {
+            return new Result<>(cur, val);
+        }
+
+        public <U> Result<U> map(Function<T, U> mapping) {
+            return Result.of(cur, mapping.apply(val));
+        }
+    }
+
+    Optional<Result<T>> parse(Cursor cur);
 
     default Optional<T> parse(String in) {
         return parse(new Cursor(in, 0)).map(r -> r.val);
     }
 
     default Parser<Tuple<T, String>> then(String pattern) {
-        return in -> then(literal(pattern)).parse(in);
+        return cur -> then(literal(pattern)).parse(cur);
     }
 
     default <U> Parser<Tuple<T, U>> then(Supplier<Parser<U>> that) {
-        return in -> then(that.get()).parse(in);
+        return cur -> then(that.get()).parse(cur);
     }
 
     // TODO: one-liner?
     default <U> Parser<Tuple<T, U>> then(Parser<U> that) {
-        return in -> parse(in)
+        return cur -> parse(cur)
                 .flatMap(rt -> that.parse(rt.cur)
-                        .map(ru -> new Result<>(ru.cur, new Tuple<>(rt.val, ru.val))));
+                        .map(ru -> Result.of(ru.cur, tuple(rt.val, ru.val))));
     }
 
     default Parser<String> skipLeft(String pattern) {
-        return in -> skipLeft(literal(pattern)).parse(in);
+        return cur -> skipLeft(literal(pattern)).parse(cur);
     }
 
     default <U> Parser<U> skipLeft(Supplier<Parser<U>> that) {
-        return in -> skipLeft(that.get()).parse(in);
+        return cur -> skipLeft(that.get()).parse(cur);
     }
 
     default <U> Parser<U> skipLeft(Parser<U> that) {
-        return in -> then(that).parse(in).map(r -> r.map(Tuple::_2));
+        return cur -> then(that).parse(cur).map(r -> r.map(Tuple::_2));
     }
 
     default Parser<T> skipRight(String pattern) {
-        return in -> skipRight(literal(pattern)).parse(in);
+        return cur -> skipRight(literal(pattern)).parse(cur);
     }
 
     default Parser<T> skipRight(Supplier<Parser<?>> that) {
-        return in -> skipRight(that.get()).parse(in);
+        return cur -> skipRight(that.get()).parse(cur);
     }
 
     default Parser<T> skipRight(Parser<?> that) {
-        return in -> then(that).parse(in).map(r -> r.map(Tuple::_1));
+        return cur -> then(that).parse(cur).map(r -> r.map(Tuple::_1));
     }
 
     default Parser<T> or(Supplier<Parser<T>> that) {
-        return in -> or(that.get()).parse(in);
+        return cur -> or(that.get()).parse(cur);
     }
 
     default Parser<T> or(Parser<T> that) {
-        return in -> parse(in).or(() -> that.parse(in));
+        return cur -> parse(cur).or(() -> that.parse(cur));
     }
 
     default <U> Parser<U> map(Function<T, U> mapping) {
-        return in -> parse(in).map(r -> r.map(mapping));
+        return cur -> parse(cur).map(r -> r.map(mapping));
     }
 }

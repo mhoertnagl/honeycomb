@@ -13,8 +13,8 @@ public class Parsers {
     public static final Parser<Integer> INT = regex("[+-]?[0-9]+").map(Integer::parseInt);
 
     // TODO: use cases for succeed?
-//    public static Parser<?> succeed() {
-//        return in -> Optional.of(new Parser.Result<>(in, null));
+//    public static <T> Parser<T> succeed(T val) {
+//        return in -> Optional.of(Parser.Result.of(in, val));
 //    }
 
     public static Parser<String> literal(String pattern) {
@@ -44,13 +44,13 @@ public class Parsers {
         }
 
         @Override
-        public Optional<Result<String>> parse(Cursor in) {
-            final var val = in.in();
+        public Optional<Result<String>> parse(Cursor cur) {
+            final var val = cur.in();
             final var plen = pattern.length();
             final var vlen = val.length();
-            final var pos = in.pos();
+            final var pos = cur.pos();
             if (pos < vlen && val.substring(pos).startsWith(pattern)) {
-                return Optional.of(new Result<>(new Cursor(val, pos + plen), pattern));
+                return Optional.of(Result.of(cur.advanceBy(plen), pattern));
             }
             return Optional.empty();
         }
@@ -68,15 +68,15 @@ public class Parsers {
         }
 
         @Override
-        public Optional<Result<String>> parse(Cursor in) {
-            final var matcher = pattern.matcher(in.in());
+        public Optional<Result<String>> parse(Cursor cur) {
+            final var matcher = pattern.matcher(cur.in());
             // Define the start and end positions to be the current parser offset
             // and the end of the entire string.
-            matcher.region(in.pos(), in.in().length());
+            matcher.region(cur.pos(), cur.in().length());
             // See, if the pattern matches the input at the beginning of the
             // region as defined above.
             if (matcher.lookingAt()) {
-                return Optional.of(new Result<>(new Cursor(in.in(), matcher.end()), matcher.group()));
+                return Optional.of(Result.of(cur.positionAt(matcher.end()), matcher.group()));
             }
             return Optional.empty();
         }

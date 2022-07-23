@@ -6,7 +6,6 @@ import static com.honeycomb.Conversions.*;
 import static com.honeycomb.Parsers.*;
 
 // TODO: many, many1, list, list1, maybe
-// TODO: complete conversions.
 // TODO: move functions to Prelude?
 // TODO: error reporting?
 

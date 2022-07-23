@@ -8,6 +8,8 @@ public class Prelude {
 
     public record Tuple<A, B>(A _1, B _2) {}
 
+    public static <A, B> Tuple<A, B> tuple(A _1, B _2) { return new Tuple<>(_1, _2); }
+
 //    @SafeVarargs
 //    public static <T> List<T> append(List<T> es, T... ts) {
 //        es.addAll(Arrays.asList(ts));
