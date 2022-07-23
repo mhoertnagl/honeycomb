@@ -7,6 +7,12 @@ import java.util.function.Supplier;
 import static com.honeycomb.Prelude.*;
 import static com.honeycomb.Parsers.*;
 
+/**
+ *
+ *
+ * @param <T> the type of the parser result value.
+ * @since 1.0
+ */
 public interface Parser<T> {
 
     record Cursor(String in, Integer pos) {
@@ -20,21 +26,21 @@ public interface Parser<T> {
         }
     }
 
-    record Result<T>(Cursor cur, T val) {
+    record State<T>(Cursor cur, T val) {
 
-        public static <U> Result<U> of(Cursor cur, U val) {
-            return new Result<>(cur, val);
+        public static <U> State<U> of(Cursor cur, U val) {
+            return new State<>(cur, val);
         }
 
-        public <U> Result<U> map(Function<T, U> mapping) {
-            return Result.of(cur, mapping.apply(val));
+        public <U> State<U> map(Function<T, U> mapping) {
+            return State.of(cur, mapping.apply(val));
         }
     }
 
-    Optional<Result<T>> parse(Cursor cur);
+    Optional<State<T>> parse(Cursor cur);
 
     default Optional<T> parse(String in) {
-        return parse(new Cursor(in, 0)).map(r -> r.val);
+        return parse(new Cursor(in, 0)).map(s -> s.val);
     }
 
     default Parser<Tuple<T, String>> then(String pattern) {
@@ -48,8 +54,8 @@ public interface Parser<T> {
     // TODO: one-liner?
     default <U> Parser<Tuple<T, U>> then(Parser<U> that) {
         return cur -> parse(cur)
-                .flatMap(rt -> that.parse(rt.cur)
-                        .map(ru -> Result.of(ru.cur, tuple(rt.val, ru.val))));
+                .flatMap(t -> that.parse(t.cur)
+                        .map(u -> State.of(u.cur, tuple(t.val, u.val))));
     }
 
     default Parser<String> skipLeft(String pattern) {
@@ -61,7 +67,7 @@ public interface Parser<T> {
     }
 
     default <U> Parser<U> skipLeft(Parser<U> that) {
-        return cur -> then(that).parse(cur).map(r -> r.map(Tuple::_2));
+        return cur -> then(that).parse(cur).map(s -> s.map(Tuple::_2));
     }
 
     default Parser<T> skipRight(String pattern) {
@@ -73,7 +79,7 @@ public interface Parser<T> {
     }
 
     default Parser<T> skipRight(Parser<?> that) {
-        return cur -> then(that).parse(cur).map(r -> r.map(Tuple::_1));
+        return cur -> then(that).parse(cur).map(s -> s.map(Tuple::_1));
     }
 
     default Parser<T> or(Supplier<Parser<T>> that) {
@@ -85,6 +91,6 @@ public interface Parser<T> {
     }
 
     default <U> Parser<U> map(Function<T, U> mapping) {
-        return cur -> parse(cur).map(r -> r.map(mapping));
+        return cur -> parse(cur).map(s -> s.map(mapping));
     }
 }

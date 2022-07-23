@@ -6,17 +6,26 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static com.honeycomb.Conversions.to;
+
 public class Parsers {
 
-    public static final Parser<String> WS = regex("\\p{Z}*");
+    private static final String WS_PATTERN = "\\p{Z}*";
+    private static final String UID_PATTERN = "[\\p{L}][\\p{L}\\p{Nd}]*";
+    private static final String INT_PATTERN = "[+-]?[0-9]+";
+    private static final String FLOAT_PATTERN = "[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)";
 
-    public static final Parser<String> UID = regex("[\\p{L}][\\p{L}\\p{Nd}]*");
+    public static final Parser<String> WS = regex(WS_PATTERN);
 
-    public static final Parser<Integer> INT = regex("[+-]?[0-9]+").map(Integer::parseInt);
+    public static final Parser<String> UID = regex(UID_PATTERN);
 
-    public static <T> Parser<T> succeed(T val) {
-        return cur -> Optional.of(Parser.Result.of(cur, val));
-    }
+    public static final Parser<Integer> INT = regex(INT_PATTERN).map(Integer::parseInt);
+
+    public static final Parser<Double> FLOAT = regex(FLOAT_PATTERN).map(Double::parseDouble);
+
+//    public static <T> Parser<T> succeed(T val) {
+//        return cur -> Optional.of(Parser.State.of(cur, val));
+//    }
 
     public static Parser<String> literal(String pattern) {
         return new LiteralParser(pattern);
@@ -62,8 +71,8 @@ public class Parsers {
     }
 
     public static <T> Parser<List<T>> many1(Parser<T> parser) {
-        return parser.then(many(parser)).map(t -> Prelude.prepend(t._1(), t._2()));
-        // return cur -> parser.then(many(parser)).parse(cur).map(r -> r.map(t -> Prelude.prepend(t._1(), t._2())));
+        return parser.then(many(parser)).map(to(Prelude::prepend));
+        // return cur -> parser.then(many(parser)).parse(cur).map(s -> s.map(to(Prelude::prepend)));
     }
 
     public static class LiteralParser implements Parser<String> {
@@ -75,13 +84,13 @@ public class Parsers {
         }
 
         @Override
-        public Optional<Result<String>> parse(Cursor cur) {
-            final var val = cur.in();
-            final var plen = pattern.length();
-            final var vlen = val.length();
+        public Optional<State<String>> parse(Cursor cur) {
             final var pos = cur.pos();
-            if (pos < vlen && val.substring(pos).startsWith(pattern)) {
-                return Optional.of(Result.of(cur.advanceBy(plen), pattern));
+            final var val = cur.in();
+            final var pln = pattern.length();
+            final var vln = val.length();
+            if (pos < vln && val.substring(pos).startsWith(pattern)) {
+                return Optional.of(State.of(cur.advanceBy(pln), pattern));
             }
             return Optional.empty();
         }
@@ -89,8 +98,7 @@ public class Parsers {
 
     public static class RegexParser implements Parser<String> {
 
-        private static final int PATTERN_FLAGS =
-                Pattern.UNICODE_CHARACTER_CLASS;
+        private static final int PATTERN_FLAGS = Pattern.UNICODE_CHARACTER_CLASS;
 
         private final Pattern pattern;
 
@@ -99,7 +107,7 @@ public class Parsers {
         }
 
         @Override
-        public Optional<Result<String>> parse(Cursor cur) {
+        public Optional<State<String>> parse(Cursor cur) {
             final var matcher = pattern.matcher(cur.in());
             // Define the start and end positions to be the current parser offset
             // and the end of the entire string.
@@ -107,7 +115,7 @@ public class Parsers {
             // See, if the pattern matches the input at the beginning of the
             // region as defined above.
             if (matcher.lookingAt()) {
-                return Optional.of(Result.of(cur.positionAt(matcher.end()), matcher.group()));
+                return Optional.of(State.of(cur.positionAt(matcher.end()), matcher.group()));
             }
             return Optional.empty();
         }
@@ -122,15 +130,15 @@ public class Parsers {
         }
 
         @Override
-        public Optional<Result<List<T>>> parse(Cursor cur) {
+        public Optional<State<List<T>>> parse(Cursor cur) {
             final var list = new ArrayList<T>();
-            var res = parser.parse(cur);
-            while (res.isPresent()) {
-                list.add(res.get().val());
-                cur = res.get().cur();
-                res = parser.parse(cur);
+            var state = parser.parse(cur);
+            while (state.isPresent()) {
+                list.add(state.get().val());
+                cur = state.get().cur();
+                state = parser.parse(cur);
             }
-            return Optional.of(Result.of(cur, list));
+            return Optional.of(State.of(cur, list));
         }
     }
 }
