@@ -6,6 +6,9 @@ import java.util.function.Function;
 
 import static com.honeycomb.Prelude.*;
 
+/**
+ * @since 1.0
+ */
 public class Conversions {
 
     public static <T1, R>

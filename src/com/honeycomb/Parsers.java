@@ -8,29 +8,64 @@ import java.util.regex.Pattern;
 
 import static com.honeycomb.Conversions.to;
 
-public class Parsers {
+/**
+ * @since 1.0
+ */
+public final class Parsers {
 
+    /** Unicode white space pattern. */
     private static final String WS_PATTERN = "\\p{Z}*";
+
+    /** Pattern for Unicode identifiers. */
     private static final String UID_PATTERN = "[\\p{L}][\\p{L}\\p{Nd}]*";
+
+    /** Pattern for integers. */
     private static final String INT_PATTERN = "[+-]?[0-9]+";
+
+    /** Pattern for floating point numbers. */
     private static final String FLOAT_PATTERN = "[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)";
 
+    /**
+     * Parses zero or more Unicode white space characters.
+     */
     public static final Parser<String> WS = regex(WS_PATTERN);
 
+    /**
+     * Parses a Unicode identifier. Requires a non-numeric character at the
+     * beginning.
+     */
     public static final Parser<String> UID = regex(UID_PATTERN);
 
+    /**
+     * Parses an integer.
+     */
     public static final Parser<Integer> INT = regex(INT_PATTERN).map(Integer::parseInt);
 
+    /**
+     * Parses a floating point number.
+     */
     public static final Parser<Double> FLOAT = regex(FLOAT_PATTERN).map(Double::parseDouble);
 
 //    public static <T> Parser<T> succeed(T val) {
 //        return cur -> Optional.of(Parser.State.of(cur, val));
 //    }
 
+    /**
+     * Parses the string literal {@code pattern}.
+     *
+     * @param pattern the string to parse
+     * @return a {@link Parser} that parses strings literal
+     */
     public static Parser<String> literal(String pattern) {
         return new LiteralParser(pattern);
     }
 
+    /**
+     * Parses input that matches the regex {@code pattern}.
+     *
+     * @param pattern the regex pattern
+     * @return a {@link Parser} that parses the regex pattern
+     */
     public static Parser<String> regex(String pattern) {
         return new RegexParser(pattern);
     }
@@ -44,16 +79,6 @@ public class Parsers {
     public static <T> Parser<Optional<T>> maybe(Parser<T> parser) {
         return parser.map(Optional::of);
         // return cur -> parser.parse(cur).map(r -> r.map(Optional::of));
-    }
-
-    @SafeVarargs
-    public static <T> Parser<T> any(Supplier<Parser<T>> parser, Supplier<Parser<T>>... parsers) {
-        return Prelude.reduce(parsers, parser.get(), Parser::or);
-    }
-
-    @SafeVarargs
-    public static <T> Parser<T> any(Parser<T> parser, Parser<T>... parsers) {
-        return Prelude.reduce(parsers, parser, Parser::or);
     }
 
     public static <T> Parser<List<T>> many(Supplier<Parser<T>> parser) {
@@ -75,7 +100,17 @@ public class Parsers {
         // return cur -> parser.then(many(parser)).parse(cur).map(s -> s.map(to(Prelude::prepend)));
     }
 
-    public static class LiteralParser implements Parser<String> {
+    @SafeVarargs
+    public static <T> Parser<T> any(Supplier<Parser<T>> parser, Supplier<Parser<T>>... parsers) {
+        return Prelude.reduce(parsers, parser.get(), Parser::or);
+    }
+
+    @SafeVarargs
+    public static <T> Parser<T> any(Parser<T> parser, Parser<T>... parsers) {
+        return Prelude.reduce(parsers, parser, Parser::or);
+    }
+
+    public static final class LiteralParser implements Parser<String> {
 
         private final String pattern;
 
@@ -96,7 +131,7 @@ public class Parsers {
         }
     }
 
-    public static class RegexParser implements Parser<String> {
+    public static final class RegexParser implements Parser<String> {
 
         private static final int PATTERN_FLAGS = Pattern.UNICODE_CHARACTER_CLASS;
 
@@ -121,7 +156,7 @@ public class Parsers {
         }
     }
 
-    public static class ManyParser<T> implements Parser<List<T>> {
+    public static final class ManyParser<T> implements Parser<List<T>> {
 
         private final Parser<T> parser;
 

@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
+/**
+ * @since 1.0
+ */
 public class Prelude {
 
     public record Tuple<A, B>(A _1, B _2) {}
@@ -16,6 +19,15 @@ public class Prelude {
 //        return es;
 //    }
 
+    /**
+     * Prepends an element {@code t} to the list {@code ts} and returns the
+     * mutated list.
+     *
+     * @param t the element to prepend
+     * @param ts the list to prepend the element {@code t} to
+     * @return the same list with the element {@code t} prepended
+     * @param <T> the type of the list and the element
+     */
     public static <T> List<T> prepend(T t, List<T> ts) {
         ts.add(0, t);
         return ts;

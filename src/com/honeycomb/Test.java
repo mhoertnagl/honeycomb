@@ -32,7 +32,7 @@ public class Test {
         public record BinOpExpr(Expr left, String op, Expr right) implements Expr {
 
             // Return as Expr. This way we don't need to add explicit casts
-            // for the first parser map.
+            // to the first parser map.
             public static Expr create(Expr left, String op, Expr right) {
                 return new BinOpExpr(left, op, right);
             }
