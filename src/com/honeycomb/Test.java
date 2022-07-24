@@ -9,6 +9,7 @@ import static com.honeycomb.Parsers.*;
 // TODO: list, list1
 // TODO: move functions to Prelude?
 // TODO: error reporting?
+// TODO: WS aware versions.
 
 public class Test {
 
@@ -17,14 +18,12 @@ public class Test {
         }
 
         public record NumExpr(Integer num) implements Expr {
-
             public static Expr create(Integer num) {
                 return new NumExpr(num);
             }
         }
 
         public record VarExpr(String name) implements Expr {
-
             public static Expr create(String name) {
                 return new VarExpr(name);
             }
