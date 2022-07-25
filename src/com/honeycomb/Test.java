@@ -14,6 +14,7 @@ import static com.honeycomb.Parsers.*;
 public class Test {
 
     class Ast {
+
         public interface Expr {
         }
 

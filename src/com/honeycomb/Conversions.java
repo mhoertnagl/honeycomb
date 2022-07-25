@@ -1,7 +1,5 @@
 package com.honeycomb;
 
-import com.honeycomb.funs.*;
-
 import java.util.function.Function;
 
 import static com.honeycomb.Prelude.*;
