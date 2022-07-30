@@ -46,9 +46,9 @@ public final class Parsers {
      */
     public static final Parser<Double> FLOAT = regex(FLOAT_PATTERN).map(Double::parseDouble);
 
-//    public static <T> Parser<T> succeed(T val) {
-//        return cur -> Optional.of(Parser.State.of(cur, val));
-//    }
+    public static <T> Parser<T> succeed(T val) {
+        return cur -> Optional.of(Parser.State.of(cur, val));
+    }
 
     /**
      * Parses the string literal {@code pattern}.
@@ -75,10 +75,8 @@ public final class Parsers {
         // return cur -> maybe(parser.get()).parse(cur);
     }
 
-    // TODO: Does maybe work?
     public static <T> Parser<Optional<T>> maybe(Parser<T> parser) {
-        return parser.map(Optional::of);
-        // return cur -> parser.parse(cur).map(r -> r.map(Optional::of));
+        return parser.map(Optional::of).or(succeed(Optional.empty()));
     }
 
     public static <T> Parser<List<T>> many(Supplier<Parser<T>> parser) {

@@ -4,38 +4,42 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.honeycomb.Assert.assertOptionalPresent;
+import static com.honeycomb.Parsers.*;
 
 class MaybeParserTest {
 
-//    @Test
-//    void parseExisting() {
-//        final var p = new RegexParser("[a-zA-Z][a-zA-Z0-9]*");
-//        final var parser = new MaybeParser<>(p);
-//        final var state = parser.parse("prevVal");
-//        assertTrue(state.isPresent());
-//        assertEquals(Optional.of("prevVal"), state.get());
-//    }
-//
-//    @Test
-//    void parseNonExisting() {
-//        final var p = new RegexParser("[a-zA-Z][a-zA-Z0-9]*");
-//        final var parser = new MaybeParser<>(p);
-//        final var state = parser.parse("42");
-//        assertTrue(state.isPresent());
-//        assertEquals(Optional.empty(), state.get());
-//    }
-//
-//    @Test
-//    void parseMap() {
-//        record IdNode(String id) {}
-//        final var p = new RegexParser("[a-zA-Z][a-zA-Z0-9]*")
-//                .map(IdNode::new);
-//        final var parser = new MaybeParser<>(p);
-//        final var state = parser.parse("prevVal");
-//        assertTrue(state.isPresent());
-//        assertEquals(Optional.of(new IdNode("prevVal")), state.get());
-//    }
+    @Test
+    void parseExisting() {
+        final var parser = maybe(literal("private"));
+        final var value = parser.parse("private");
+        assertOptionalPresent(Optional.of("private"), value);
+    }
 
-    // TODO: Test sequence with optional value.
+    @Test
+    void parseNonExisting() {
+        final var parser = maybe(literal("private"));
+        final var value = parser.parse("");
+        assertOptionalPresent(Optional.empty(), value);
+    }
+
+    @Test
+    void parseExistingAndMap() {
+        record MethodNode(boolean isPrivate) {}
+        final var parser = maybe(literal("private"))
+                .map(Optional::isPresent)
+                .map(MethodNode::new);
+        final var value = parser.parse("private");
+        assertOptionalPresent(new MethodNode(true), value);
+    }
+
+    @Test
+    void parseNonExistingAndMap() {
+        record MethodNode(boolean isPrivate) {}
+        final var parser = maybe(literal("private"))
+                .map(Optional::isPresent)
+                .map(MethodNode::new);
+        final var value = parser.parse("");
+        assertOptionalPresent(new MethodNode(false), value);
+    }
 }
