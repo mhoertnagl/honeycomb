@@ -165,24 +165,48 @@ public final class Parsers {
         return Prelude.reduce(parsers, parser, Parser::or);
     }
 
+    public static <T> Parser<List<T>> list(String delimiter, Supplier<Parser<T>> parser) {
+        return list(delimiter, parser.get());
+    }
+
     public static <T> Parser<List<T>> list(String delimiter, Parser<T> parser) {
         return list(literal(delimiter), parser);
+    }
+
+    public static <T> Parser<List<T>> list(Parser<?> delimiter, Supplier<Parser<T>> parser) {
+        return list(delimiter, parser.get());
     }
 
     public static <T> Parser<List<T>> list(Parser<?> delimiter, Parser<T> parser) {
         return maybe(list1(delimiter, parser)).map(o -> o.get()).or(succeed(List.of()));
     }
 
+    public static <T> Parser<List<T>> list1(String delimiter, Supplier<Parser<T>> parser) {
+        return list1(literal(delimiter), parser.get());
+    }
+
     public static <T> Parser<List<T>> list1(String delimiter, Parser<T> parser) {
         return list1(literal(delimiter), parser);
+    }
+
+    public static <T> Parser<List<T>> list1(Parser<?> delimiter, Supplier<Parser<T>> parser) {
+        return list1(delimiter, parser.get());
     }
 
     public static <T> Parser<List<T>> list1(Parser<?> delimiter, Parser<T> parser) {
         return parser.then(many(delimiter.skipLeft(parser))).map(to(Prelude::prepend));
     }
 
+    public static <T> Parser<T> between(String left, Supplier<Parser<T>> parser, String right) {
+        return between(literal(left), parser.get(), literal(right));
+    }
+
     public static <T> Parser<T> between(String left, Parser<T> parser, String right) {
         return between(literal(left), parser, literal(right));
+    }
+
+    public static <T> Parser<T> between(Parser<?> left, Supplier<Parser<T>> parser, Parser<?> right) {
+        return between(left, parser.get(), right);
     }
 
     public static <T> Parser<T> between(Parser<?> left, Parser<T> parser, Parser<?> right) {

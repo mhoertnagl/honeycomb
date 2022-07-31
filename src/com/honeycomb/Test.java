@@ -6,7 +6,6 @@ import static com.honeycomb.Conversions.*;
 import static com.honeycomb.Parsers.*;
 
 // TODO: Indirection required?
-// TODO: list, list1, between (eg. between('"', term, '"'))
 // TODO: error reporting?
 // TODO: WS aware versions.
 
@@ -43,7 +42,8 @@ public class Test {
 
         private static Parser<Ast.Expr> primary() {
             return any(
-                    literal("(").skipLeft(Lang::term).skipRight(")"),
+                    between("(", Lang::term, ")"),
+                    //literal("(").skipLeft(Lang::term).skipRight(")"),
                     UID.map(Ast.VarExpr::create),
                     INT.map(Ast.NumExpr::create)
             );
