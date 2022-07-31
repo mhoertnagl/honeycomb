@@ -70,29 +70,86 @@ public final class Parsers {
         return new RegexParser(pattern);
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts to parse an optional value with
+     * {@code parser} and if successful returns an {@link Optional} holding the
+     * parsed value or {@link Optional#empty()} if {@code parser} fails. This
+     * parser never fails and always returns a successful state.
+     *
+     * @param parser a {@link Supplier} that provides a {@link Parser}
+     * @return a {@link Parser} that parses an optional value
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<Optional<T>> maybe(Supplier<Parser<T>> parser) {
         return maybe(parser.get());
         // return cur -> maybe(parser.get()).parse(cur);
     }
 
+    /**
+     * Attempts to parse an optional value with {@code parser} and if
+     * successful returns an {@link Optional} holding the parsed value or
+     * {@link Optional#empty()} if {@code parser} fails. This parser never
+     * fails and always returns a successful state.
+     *
+     * @param parser the {@link Parser} that may or may not succeed
+     * @return a {@link Parser} that parses an optional value
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<Optional<T>> maybe(Parser<T> parser) {
         return parser.map(Optional::of).or(succeed(Optional.empty()));
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@code parser} zero or more
+     * times and returns a list containing zero or more parsed values. This
+     * {@link Parser} never fails.
+     *
+     * @param parser the {@link Parser} to attempt as long as it matches
+     * @return a {@link Parser} that is attemplted as often as possible
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> many(Supplier<Parser<T>> parser) {
         return many(parser.get());
         // return cur -> many(parser.get()).parse(cur);
     }
 
+    /**
+     * Attempts {@code parser} zero or more times and returns a list containing
+     * zero or more parsed values. This {@link Parser} never fails.
+     *
+     * @param parser the {@link Parser} to attempt as long as it matches
+     * @return a {@link Parser} that is attempted as often as possible
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> many(Parser<T> parser) {
         return new ManyParser<>(parser);
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@code parser} at least once
+     * and returns a list containing at least one parsed value or fails if
+     * {@code parser} did not match even once.
+     *
+     * @param parser the {@link Parser} that has to match at least once
+     * @return a {@link Parser} that succeeds if {@code parser} matches at
+     *         least once
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> many1(Supplier<Parser<T>> parser) {
         return many1(parser.get());
         // return cur -> many1(parser.get()).parse(cur);
     }
 
+    /**
+     * Attempts {@code parser} at least once and returns a list containing at
+     * least one parsed value or fails if {@code parser} did not match even
+     * once.
+     *
+     * @param parser the {@link Parser} that has to match at least once
+     * @return a {@link Parser} that succeeds if {@code parser} matches at
+     *         least once
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> many1(Parser<T> parser) {
         return parser.then(many(parser)).map(to(Prelude::prepend));
         // return cur -> parser.then(many(parser)).parse(cur).map(s -> s.map(to(Prelude::prepend)));
@@ -106,6 +163,30 @@ public final class Parsers {
     @SafeVarargs
     public static <T> Parser<T> any(Parser<T> parser, Parser<T>... parsers) {
         return Prelude.reduce(parsers, parser, Parser::or);
+    }
+
+    public static <T> Parser<List<T>> list(String delimiter, Parser<T> parser) {
+        return list(literal(delimiter), parser);
+    }
+
+    public static <T> Parser<List<T>> list(Parser<?> delimiter, Parser<T> parser) {
+        return maybe(list1(delimiter, parser)).map(o -> o.get()).or(succeed(List.of()));
+    }
+
+    public static <T> Parser<List<T>> list1(String delimiter, Parser<T> parser) {
+        return list1(literal(delimiter), parser);
+    }
+
+    public static <T> Parser<List<T>> list1(Parser<?> delimiter, Parser<T> parser) {
+        return parser.then(many(delimiter.skipLeft(parser))).map(to(Prelude::prepend));
+    }
+
+    public static <T> Parser<T> between(String left, Parser<T> parser, String right) {
+        return between(literal(left), parser, literal(right));
+    }
+
+    public static <T> Parser<T> between(Parser<?> left, Parser<T> parser, Parser<?> right) {
+        return left.skipLeft(parser).skipRight(right);
     }
 
     public static final class LiteralParser implements Parser<String> {

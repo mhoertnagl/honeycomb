@@ -4,30 +4,28 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.honeycomb.Assert.assertOptionalPresent;
-import static com.honeycomb.Parsers.literal;
-import static com.honeycomb.Parsers.many;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.honeycomb.Assert.*;
+import static com.honeycomb.Parsers.*;
 
-class ManyParserTest {
+class Many1ParserTest {
 
     @Test
     void parseZeroTimes() {
-        final var parser = many(literal("a"));
+        final var parser = many1(literal("a"));
         final var value = parser.parse("");
-        assertOptionalPresent(List.of(), value);
+        assertOptionalEmpty(value);
     }
 
     @Test
     void parseOnce() {
-        final var parser = many(literal("a"));
+        final var parser = many1(literal("a"));
         final var value = parser.parse("a");
         assertOptionalPresent(List.of("a"), value);
     }
 
     @Test
     void parseTwice() {
-        final var parser = many(literal("a"));
+        final var parser = many1(literal("a"));
         final var value = parser.parse("aa");
         assertOptionalPresent(List.of("a", "a"), value);
     }
@@ -41,7 +39,7 @@ class ManyParserTest {
                 new Node("a"),
                 new Node("a")
         );
-        final var parser = many(literal("a").map(Node::new));
+        final var parser = many1(literal("a").map(Node::new));
         final var value = parser.parse("aaaa");
         assertOptionalPresent(expected, value);
     }
