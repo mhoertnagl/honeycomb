@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import static com.honeycomb.Conversions.to;
 
 /**
+ * A set of common predefined {@link Parser}s.
+ *
  * @since 1.0
  */
 public final class Parsers {
@@ -26,9 +28,7 @@ public final class Parsers {
     private static final String FLOAT_PATTERN =
             "[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)";
 
-    /**
-     * Parses zero or more Unicode white space characters.
-     */
+    /** Parses zero or more Unicode white space characters. */
     public static final Parser<String> WS = regex(WS_PATTERN);
 
     /**
@@ -37,9 +37,7 @@ public final class Parsers {
      */
     public static final Parser<String> UID = regex(UID_PATTERN);
 
-    /**
-     * Parses an integer.
-     */
+    /** Parses an integer. */
     public static final Parser<Integer> INT =
             regex(INT_PATTERN).map(Integer::parseInt);
 
