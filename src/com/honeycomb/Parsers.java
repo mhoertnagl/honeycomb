@@ -23,7 +23,8 @@ public final class Parsers {
     private static final String INT_PATTERN = "[+-]?[0-9]+";
 
     /** Pattern for floating point numbers. */
-    private static final String FLOAT_PATTERN = "[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)";
+    private static final String FLOAT_PATTERN =
+            "[+-]?([0-9]+([.][0-9]*)?([eE][+-]?[0-9]+)?|[.][0-9]+([eE][+-]?[0-9]+)?)";
 
     /**
      * Parses zero or more Unicode white space characters.
@@ -39,12 +40,12 @@ public final class Parsers {
     /**
      * Parses an integer.
      */
-    public static final Parser<Integer> INT = regex(INT_PATTERN).map(Integer::parseInt);
+    public static final Parser<Integer> INT =
+            regex(INT_PATTERN).map(Integer::parseInt);
 
-    /**
-     * Parses a floating point number.
-     */
-    public static final Parser<Double> FLOAT = regex(FLOAT_PATTERN).map(Double::parseDouble);
+    /** Parses a floating point number. */
+    public static final Parser<Double> FLOAT =
+            regex(FLOAT_PATTERN).map(Double::parseDouble);
 
     public static <T> Parser<T> succeed(T val) {
         return cur -> Optional.of(Parser.State.of(cur, val));
@@ -151,64 +152,127 @@ public final class Parsers {
         return parser.then(many(parser)).map(to(Prelude::prepend));
     }
 
+    /**
+     * Attempts all {@link Parser}s in order continuing until the first parser
+     * matches or failing if all alternatives fail.
+     *
+     * @param parser first {@link Parser} to apply
+     * @param parsers variable list of alternative {@link Parser}s
+     * @return a {@link Parser} that tests all alternatives in order
+     * @param <T> the common type of the parsed result value
+     */
     @SafeVarargs
     @SuppressWarnings("unchecked")
-    public static <T> Parser<T> any(Supplier<Parser<? extends T>> parser, Supplier<Parser<? extends T>>... parsers) {
-        return cur -> Prelude.reduce(parsers, (Parser<T>) parser.get(), Parser::or).parse(cur);
+    public static <T> Parser<T> any(
+            Supplier<Parser<? extends T>> parser,
+            Supplier<Parser<? extends T>>... parsers) {
+        return cur -> Prelude.reduce(
+                parsers,
+                (Parser<T>) parser.get(),
+                Parser::or
+        ).parse(cur);
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts all {@link Parser}s in order
+     * continuing until the first parser matches or failing if all
+     * alternatives fail.
+     *
+     * @param parser first {@link Parser} to apply
+     * @param parsers variable list of alternative {@link Parser}s
+     * @return a {@link Parser} that tests all alternatives in order
+     * @param <T> the common type of the parsed result value
+     */
     @SafeVarargs
     @SuppressWarnings("unchecked")
-    public static <T> Parser<T> any(Parser<? extends T> parser, Parser<? extends T>... parsers) {
+    public static <T> Parser<T> any(
+            Parser<? extends T> parser,
+            Parser<? extends T>... parsers) {
         return Prelude.reduce(parsers, (Parser<T>) parser, Parser::or);
     }
 
-    public static <T> Parser<List<T>> list(String delimiter, Supplier<Parser<T>> parser) {
+    public static <T> Parser<List<T>> list(
+            String delimiter,
+            Supplier<Parser<T>> parser) {
         return cur -> list(delimiter, parser.get()).parse(cur);
     }
 
-    public static <T> Parser<List<T>> list(String delimiter, Parser<T> parser) {
+    public static <T> Parser<List<T>> list(
+            String delimiter,
+            Parser<T> parser) {
         return list(literal(delimiter), parser);
     }
 
-    public static <T> Parser<List<T>> list(Parser<?> delimiter, Supplier<Parser<T>> parser) {
+    public static <T> Parser<List<T>> list(
+            Parser<?> delimiter,
+            Supplier<Parser<T>> parser) {
         return cur -> list(delimiter, parser.get()).parse(cur);
     }
 
-    public static <T> Parser<List<T>> list(Parser<?> delimiter, Parser<T> parser) {
-        // Optional::get() makes the compiler complain, therefore Optional::orElse(null).
-        return maybe(list1(delimiter, parser)).map(o -> o.orElse(null)).or(succeed(List.of()));
+    public static <T> Parser<List<T>> list(
+            Parser<?> delimiter,
+            Parser<T> parser) {
+        // Optional::get() makes the compiler complain,
+        // therefore Optional::orElse(null).
+        return maybe(list1(delimiter, parser))
+                .map(o -> o.orElse(null))
+                .or(succeed(List.of()));
     }
 
-    public static <T> Parser<List<T>> list1(String delimiter, Supplier<Parser<T>> parser) {
+    public static <T> Parser<List<T>> list1(
+            String delimiter,
+            Supplier<Parser<T>> parser) {
         return cur -> list1(literal(delimiter), parser.get()).parse(cur);
     }
 
-    public static <T> Parser<List<T>> list1(String delimiter, Parser<T> parser) {
+    public static <T> Parser<List<T>> list1(
+            String delimiter,
+            Parser<T> parser) {
         return list1(literal(delimiter), parser);
     }
 
-    public static <T> Parser<List<T>> list1(Parser<?> delimiter, Supplier<Parser<T>> parser) {
+    public static <T> Parser<List<T>> list1(
+            Parser<?> delimiter,
+            Supplier<Parser<T>> parser) {
         return cur -> list1(delimiter, parser.get()).parse(cur);
     }
 
-    public static <T> Parser<List<T>> list1(Parser<?> delimiter, Parser<T> parser) {
-        return parser.then(many(delimiter.skipLeft(parser))).map(to(Prelude::prepend));
+    public static <T> Parser<List<T>> list1(
+            Parser<?> delimiter,
+            Parser<T> parser) {
+        return parser.then(many(delimiter.skipLeft(parser)))
+                .map(to(Prelude::prepend));
     }
 
-    public static <T> Parser<T> between(String left, Supplier<Parser<T>> parser, String right) {
-        return cur -> between(literal(left), parser.get(), literal(right)).parse(cur);
+    public static <T> Parser<T> between(
+            String left,
+            Supplier<Parser<T>> parser,
+            String right) {
+        return cur -> between(
+                literal(left),
+                parser.get(),
+                literal(right)
+        ).parse(cur);
     }
 
-    public static <T> Parser<T> between(String left, Parser<T> parser, String right) {
+    public static <T> Parser<T> between(
+            String left,
+            Parser<T> parser,
+            String right) {
         return between(literal(left), parser, literal(right));
     }
 
-    public static <T> Parser<T> between(Parser<?> left, Supplier<Parser<T>> parser, Parser<?> right) {
+    public static <T> Parser<T> between(
+            Parser<?> left,
+            Supplier<Parser<T>> parser,
+            Parser<?> right) {
         return cur -> between(left, parser.get(), right).parse(cur);
     }
 
-    public static <T> Parser<T> between(Parser<?> left, Parser<T> parser, Parser<?> right) {
+    public static <T> Parser<T> between(
+            Parser<?> left,
+            Parser<T> parser,
+            Parser<?> right) {
         return left.skipLeft(parser).skipRight(right);
     }
 
@@ -246,13 +310,16 @@ public final class Parsers {
         @Override
         public Optional<State<? extends String>> parse(Cursor cur) {
             final var matcher = pattern.matcher(cur.in());
-            // Define the start and end positions to be the current parser offset
-            // and the end of the entire string.
+            // Define the start and end positions to be the current
+            // parser offset and the end of the entire string.
             matcher.region(cur.pos(), cur.in().length());
-            // See, if the pattern matches the input at the beginning of the
-            // region as defined above.
+            // See, if the pattern matches the input at the beginning
+            // of the region as defined above.
             if (matcher.lookingAt()) {
-                return Optional.of(State.of(cur.positionAt(matcher.end()), matcher.group()));
+                return Optional.of(State.of(
+                        cur.positionAt(matcher.end()),
+                        matcher.group())
+                );
             }
             return Optional.empty();
         }

@@ -116,26 +116,76 @@ public interface Parser<T> {
                         .map(u -> State.of(u.cur, tuple(t.val, u.val))));
     }
 
+    /**
+     * Attempts this {@link Parser}, then attempts to parse the string
+     * {@code pattern} but ignores the this {@link Parser}s result and
+     * returns the matched string {@code pattern} only.
+     *
+     * @param pattern a string literal
+     * @return a {@link Parser} that only returns the right result.
+     */
     default Parser<String> skipLeft(String pattern) {
         return skipLeft(literal(pattern));
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts this {@link Parser}, then
+     * attempts to parse {@code that} @link Parser} but ignores the this
+     * {@link Parser}s result and returns {@code that} {@link Parser}s
+     * matched result only.
+     *
+     * @param that a string literal
+     * @return a {@link Parser} that only returns the right result.
+     */
     default <U> Parser<U> skipLeft(Supplier<Parser<U>> that) {
         return cur -> skipLeft(that.get()).parse(cur);
     }
 
+    /**
+     * Attempts this {@link Parser}, then attempts to parse {@code that}
+     * {@link Parser} but ignores the this {@link Parser}s result and
+     * returns {@code that} {@link Parser}s matched result only.
+     *
+     * @param that a string literal
+     * @return a {@link Parser} that only returns the right result.
+     */
     default <U> Parser<U> skipLeft(Parser<U> that) {
         return then(that).map(Tuple::_2);
     }
 
+    /**
+     * Attempts this {@link Parser}, then attempts to parse the string
+     * {@code pattern} but ignores the parsed {@code pattern} and returns
+     * the parsed result of this {@link Parser} only.
+     *
+     * @param pattern a string literal
+     * @return a {@link Parser} that only returns the left result.
+     */
     default Parser<T> skipRight(String pattern) {
         return skipRight(literal(pattern));
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts this {@link Parser}, then
+     * {@code that} but ignores the parsed result of {@code that}
+     * {@link Parser} and returns the parsed result of this
+     * {@link Parser} only.
+     *
+     * @param that the next {@link Parser}
+     * @return a {@link Parser} that only returns the left result.
+     */
     default Parser<T> skipRight(Supplier<Parser<?>> that) {
         return cur -> skipRight(that.get()).parse(cur);
     }
 
+    /**
+     * Attempts this {@link Parser}, then {@code that} but ignores the parsed
+     * result of {@code that} {@link Parser} and returns the parsed result of
+     * this {@link Parser} only.
+     *
+     * @param that the next {@link Parser}
+     * @return a {@link Parser} that only returns the left result.
+     */
     default Parser<T> skipRight(Parser<?> that) {
         return then(that).map(Tuple::_1);
     }
