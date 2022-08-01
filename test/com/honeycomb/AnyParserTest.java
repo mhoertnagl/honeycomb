@@ -2,92 +2,84 @@ package com.honeycomb;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.honeycomb.Assert.*;
+import static com.honeycomb.Parsers.*;
 
 class AnyParserTest {
 
-//    @Test
-//    void parseFirst() {
-//        final var p1 = new LiteralParser("a");
-//        final var p2 = new LiteralParser("b");
-//        final var p3 = new LiteralParser("c");
-//        final var parser = new AnyParser<>(p1, p2, p3);
-//        final var state = parser.parse("a");
-//        assertTrue(state.isPresent());
-//        assertEquals("a", state.get());
-//    }
-//
-//    @Test
-//    void parseSecond() {
-//        final var p1 = new LiteralParser("a");
-//        final var p2 = new LiteralParser("b");
-//        final var p3 = new LiteralParser("c");
-//        final var parser = new AnyParser<>(p1, p2, p3);
-//        final var state = parser.parse("b");
-//        assertTrue(state.isPresent());
-//        assertEquals("b", state.get());
-//    }
-//
-//    @Test
-//    void parseThird() {
-//        final var p1 = new LiteralParser("a");
-//        final var p2 = new LiteralParser("b");
-//        final var p3 = new LiteralParser("c");
-//        final var parser = new AnyParser<>(p1, p2, p3);
-//        final var state = parser.parse("c");
-//        assertTrue(state.isPresent());
-//        assertEquals("c", state.get());
-//    }
-//
-//    @Test
-//    void parseInvalid() {
-//        final var p1 = new LiteralParser("a");
-//        final var p2 = new LiteralParser("b");
-//        final var p3 = new LiteralParser("c");
-//        final var parser = new AnyParser<>(p1, p2, p3);
-//        final var state = parser.parse("d");
-//        assertFalse(state.isPresent());
-//    }
-//
-//    @Test
-//    void parseMapFirst() {
-//        record ANode(String val) {}
-//        record BNode(String val) {}
-//        record CNode(String val) {}
-//        final var p1 = new LiteralParser("a").map(ANode::new);
-//        final var p2 = new LiteralParser("b").map(BNode::new);
-//        final var p3 = new LiteralParser("c").map(CNode::new);
-//        final var parser = new AnyParser<>(p1, p2, p3);
-//        final var state = parser.parse("a");
-//        assertTrue(state.isPresent());
-//        assertEquals(new ANode("a"), state.get());
-//    }
-//
-//    @Test
-//    void parseMapSecond() {
-//        record ANode(String val) {}
-//        record BNode(String val) {}
-//        record CNode(String val) {}
-//        final var p1 = new LiteralParser("a").map(ANode::new);
-//        final var p2 = new LiteralParser("b").map(BNode::new);
-//        final var p3 = new LiteralParser("c").map(CNode::new);
-//        final var parser = new AnyParser<>(p1, p2, p3);
-//        final var state = parser.parse("b");
-//        assertTrue(state.isPresent());
-//        assertEquals(new BNode("b"), state.get());
-//    }
-//
-//    @Test
-//    void parseMapThird() {
-//        record ANode(String val) {}
-//        record BNode(String val) {}
-//        record CNode(String val) {}
-//        final var p1 = new LiteralParser("a").map(ANode::new);
-//        final var p2 = new LiteralParser("b").map(BNode::new);
-//        final var p3 = new LiteralParser("c").map(CNode::new);
-//        final var parser = new AnyParser<>(p1, p2, p3);
-//        final var state = parser.parse("c");
-//        assertTrue(state.isPresent());
-//        assertEquals(new CNode("c"), state.get());
-//    }
+    @Test
+    void parseFirst() {
+        final var p1 = literal("a");
+        final var p2 = literal("b");
+        final var p3 = literal("c");
+        final var parser = any(p1, p2, p3);
+        final var value = parser.parse("a");
+        assertOptionalPresent("a", value);
+    }
+
+    @Test
+    void parseSecond() {
+        final var p1 = literal("a");
+        final var p2 = literal("b");
+        final var p3 = literal("c");
+        final var parser = any(p1, p2, p3);
+        final var value = parser.parse("b");
+        assertOptionalPresent("b", value);
+    }
+
+    @Test
+    void parseThird() {
+        final var p1 = literal("a");
+        final var p2 = literal("b");
+        final var p3 = literal("c");
+        final var parser = any(p1, p2, p3);
+        final var value = parser.parse("c");
+        assertOptionalPresent("c", value);
+    }
+
+    @Test
+    void parseInvalid() {
+        final var p1 = literal("a");
+        final var p2 = literal("b");
+        final var p3 = literal("c");
+        final var parser = any(p1, p2, p3);
+        final var value = parser.parse("d");
+        assertOptionalEmpty(value);
+    }
+
+    @Test
+    void parseMapFirst() {
+        final var p1 = literal("a").map(ANode::new);
+        final var p2 = literal("b").map(BNode::new);
+        final var p3 = literal("c").map(CNode::new);
+        final var parser = any(p1, p2, p3);
+        final var value = parser.parse("a");
+        assertOptionalPresent(new ANode("a"), value);
+    }
+
+    @Test
+    void parseMapSecond() {
+        final var p1 = literal("a").map(ANode::new);
+        final var p2 = literal("b").map(BNode::new);
+        final var p3 = literal("c").map(CNode::new);
+        final var parser = any(p1, p2, p3);
+        final var value = parser.parse("b");
+        assertOptionalPresent(new BNode("b"), value);
+    }
+
+    @Test
+    void parseMapThird() {
+        final var p1 = literal("a").map(ANode::new);
+        final var p2 = literal("b").map(BNode::new);
+        final var p3 = literal("c").map(CNode::new);
+        final var parser = any(p1, p2, p3);
+        final var value = parser.parse("c");
+        assertOptionalPresent(new CNode("c"), value);
+    }
+
+    interface Node {}
+
+    record ANode(String val) implements Node { }
+    record BNode(String val) implements Node { }
+    record CNode(String val) implements Node { }
 }

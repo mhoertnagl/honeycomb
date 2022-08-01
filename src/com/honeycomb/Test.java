@@ -13,85 +13,66 @@ public class Test {
 
     class Ast {
 
-        public interface Expr {
-        }
+        public interface Expr { }
 
-        public record NumExpr(Integer num) implements Expr {
-            public static Expr create(Integer num) {
-                return new NumExpr(num);
-            }
-        }
+        public record NumExpr(Integer num) implements Expr { }
 
-        public record VarExpr(String name) implements Expr {
-            public static Expr create(String name) {
-                return new VarExpr(name);
-            }
-        }
+        public record VarExpr(String name) implements Expr { }
 
-        public record BinOpExpr(Expr left, String op, Expr right) implements Expr {
-
-            // Return as Expr. This way we don't need to add explicit casts
-            // to the first parser map.
-            public static Expr create(Expr left, String op, Expr right) {
-                return new BinOpExpr(left, op, right);
-            }
-        }
+        public record BinOpExpr(Expr left, String op, Expr right) implements Expr { }
     }
 
     class Lang {
 
-        private static Parser<Ast.Expr> primary() {
-            return any(
-                    between("(", Lang::term, ")"),
-                    //literal("(").skipLeft(Lang::term).skipRight(")"),
-                    UID.map(Ast.VarExpr::create),
-                    INT.map(Ast.NumExpr::create)
-            );
-        }
+//        private static Parser<Ast.Expr> primary() {
+//            return any(
+//                    between("(", Lang::term, ")"),
+//                    UID.map(Ast.VarExpr::new),
+//                    INT.map(Ast.NumExpr::new)
+//            );
+//        }
+//
+//        private static Parser<Ast.Expr> factor() {
+//             return any(
+//                    Lang.primary().then("*").then(Lang::factor).map(to(Ast.BinOpExpr::new)),
+//                    Lang.primary().then("/").then(Lang::factor).map(to(Ast.BinOpExpr::new)),
+//                    Lang.primary()
+//            );
+//        }
+//
+//        private static Parser<Ast.Expr> term() {
+//            return any(
+//                    Lang.factor().then("+").then(Lang::term).map(to(Ast.BinOpExpr::new)),
+//                    Lang.factor().then("-").then(Lang::term).map(to(Ast.BinOpExpr::new)),
+//                    Lang.factor()
+//            );
+//        }
+//
+//        public static Optional<Ast.Expr> parse(String in) {
+//            return term().parse(in);
+//        }
 
-        private static Parser<Ast.Expr> factor() {
-             return any(
-                    Lang.primary().then("*").then(Lang::factor).map(to(Ast.BinOpExpr::create)),
-                    Lang.primary().then("/").then(Lang::factor).map(to(Ast.BinOpExpr::create)),
-                    Lang.primary()
-            );
-        }
+        private static final Parser<Ast.Expr> primary = any(
+                between("(", () -> Lang.term, ")"),
+                UID.map(Ast.VarExpr::new),
+                INT.map(Ast.NumExpr::new)
+        );
 
-        private static Parser<Ast.Expr> term() {
-            return any(
-                    Lang.factor().then("+").then(Lang::term).map(to(Ast.BinOpExpr::create)),
-                    Lang.factor().then("-").then(Lang::term).map(to(Ast.BinOpExpr::create)),
-                    Lang.factor()
-            );
-        }
+        private static final Parser<Ast.Expr> factor = any(
+                Lang.primary.then("*").then(() -> Lang.factor).map(to(Ast.BinOpExpr::new)),
+                Lang.primary.then("/").then(() -> Lang.factor).map(to(Ast.BinOpExpr::new)),
+                Lang.primary
+        );
+
+        private static final Parser<Ast.Expr> term = any(
+                Lang.factor.then("+").then(() -> Lang.term).map(to(Ast.BinOpExpr::new)),
+                Lang.factor.then("-").then(() -> Lang.term).map(to(Ast.BinOpExpr::new)),
+                Lang.factor
+        );
 
         public static Optional<Ast.Expr> parse(String in) {
-            return term().parse(in);
+            return term.parse(in);
         }
-
-        // First expression needs a cast to Expr, or else Java will infer
-        // NumExpr which is not a superclass of VarExpr.
-//        private static final Parser<Ast.Expr> primary = any(
-//                () -> literal("(").skipLeft(() -> Lang.term).skipRight(")"),
-//                () -> UID.map(Ast.VarExpr::create),
-//                () -> INT.map(Ast.NumExpr::create)
-//        );
-//
-//        private static final Parser<Ast.Expr> factor = any(
-//                () -> Lang.primary.then("*").then(() -> Lang.factor).map(to(Ast.BinOpExpr::create)),
-//                () -> Lang.primary.then("/").then(() -> Lang.factor).map(to(Ast.BinOpExpr::create)),
-//                () -> Lang.primary
-//        );
-//
-//        private static final Parser<Ast.Expr> term = any(
-//                () -> Lang.factor.then("+").then(() -> Lang.term).map(to(Ast.BinOpExpr::create)),
-//                () -> Lang.factor.then("-").then(() -> Lang.term).map(to(Ast.BinOpExpr::create)),
-//                () -> Lang.factor
-//        );
-
-//        public static Optional<Ast.Expr> parse(String in) {
-//            return term.parse(in);
-//        }
     }
 
     public static void main(String[] args) {

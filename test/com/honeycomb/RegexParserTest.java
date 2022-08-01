@@ -3,7 +3,7 @@ package com.honeycomb;
 import org.junit.jupiter.api.Test;
 
 import static com.honeycomb.Assert.*;
-import static com.honeycomb.Parsers.regex;
+import static com.honeycomb.Parsers.*;
 
 class RegexParserTest {
 

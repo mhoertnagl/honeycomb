@@ -3,8 +3,7 @@ package com.honeycomb;
 import org.junit.jupiter.api.Test;
 
 import static com.honeycomb.Assert.*;
-import static com.honeycomb.Parsers.literal;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.honeycomb.Parsers.*;
 
 class LiteralParserTest {
 
@@ -18,8 +17,8 @@ class LiteralParserTest {
     @Test
     void parseInvalid() {
         final var parser = literal("test");
-        final var state = parser.parse("Test");
-        assertFalse(state.isPresent());
+        final var value = parser.parse("Test");
+        assertOptionalEmpty(value);
     }
 
     @Test

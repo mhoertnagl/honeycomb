@@ -81,8 +81,7 @@ public final class Parsers {
      * @param <T> the type of the parsed result value
      */
     public static <T> Parser<Optional<T>> maybe(Supplier<Parser<T>> parser) {
-        return maybe(parser.get());
-        // return cur -> maybe(parser.get()).parse(cur);
+        return cur -> maybe(parser.get()).parse(cur);
     }
 
     /**
@@ -109,8 +108,7 @@ public final class Parsers {
      * @param <T> the type of the parsed result value
      */
     public static <T> Parser<List<T>> many(Supplier<Parser<T>> parser) {
-        return many(parser.get());
-        // return cur -> many(parser.get()).parse(cur);
+        return cur -> many(parser.get()).parse(cur);
     }
 
     /**
@@ -136,8 +134,7 @@ public final class Parsers {
      * @param <T> the type of the parsed result value
      */
     public static <T> Parser<List<T>> many1(Supplier<Parser<T>> parser) {
-        return many1(parser.get());
-        // return cur -> many1(parser.get()).parse(cur);
+        return cur -> many1(parser.get()).parse(cur);
     }
 
     /**
@@ -152,21 +149,22 @@ public final class Parsers {
      */
     public static <T> Parser<List<T>> many1(Parser<T> parser) {
         return parser.then(many(parser)).map(to(Prelude::prepend));
-        // return cur -> parser.then(many(parser)).parse(cur).map(s -> s.map(to(Prelude::prepend)));
     }
 
     @SafeVarargs
-    public static <T> Parser<T> any(Supplier<Parser<T>> parser, Supplier<Parser<T>>... parsers) {
-        return Prelude.reduce(parsers, parser.get(), Parser::or);
+    @SuppressWarnings("unchecked")
+    public static <T> Parser<T> any(Supplier<Parser<? extends T>> parser, Supplier<Parser<? extends T>>... parsers) {
+        return cur -> Prelude.reduce(parsers, (Parser<T>) parser.get(), Parser::or).parse(cur);
     }
 
     @SafeVarargs
-    public static <T> Parser<T> any(Parser<T> parser, Parser<T>... parsers) {
-        return Prelude.reduce(parsers, parser, Parser::or);
+    @SuppressWarnings("unchecked")
+    public static <T> Parser<T> any(Parser<? extends T> parser, Parser<? extends T>... parsers) {
+        return Prelude.reduce(parsers, (Parser<T>) parser, Parser::or);
     }
 
     public static <T> Parser<List<T>> list(String delimiter, Supplier<Parser<T>> parser) {
-        return list(delimiter, parser.get());
+        return cur -> list(delimiter, parser.get()).parse(cur);
     }
 
     public static <T> Parser<List<T>> list(String delimiter, Parser<T> parser) {
@@ -174,15 +172,16 @@ public final class Parsers {
     }
 
     public static <T> Parser<List<T>> list(Parser<?> delimiter, Supplier<Parser<T>> parser) {
-        return list(delimiter, parser.get());
+        return cur -> list(delimiter, parser.get()).parse(cur);
     }
 
     public static <T> Parser<List<T>> list(Parser<?> delimiter, Parser<T> parser) {
-        return maybe(list1(delimiter, parser)).map(o -> o.get()).or(succeed(List.of()));
+        // Optional::get() makes the compiler complain, therefore Optional::orElse(null).
+        return maybe(list1(delimiter, parser)).map(o -> o.orElse(null)).or(succeed(List.of()));
     }
 
     public static <T> Parser<List<T>> list1(String delimiter, Supplier<Parser<T>> parser) {
-        return list1(literal(delimiter), parser.get());
+        return cur -> list1(literal(delimiter), parser.get()).parse(cur);
     }
 
     public static <T> Parser<List<T>> list1(String delimiter, Parser<T> parser) {
@@ -190,7 +189,7 @@ public final class Parsers {
     }
 
     public static <T> Parser<List<T>> list1(Parser<?> delimiter, Supplier<Parser<T>> parser) {
-        return list1(delimiter, parser.get());
+        return cur -> list1(delimiter, parser.get()).parse(cur);
     }
 
     public static <T> Parser<List<T>> list1(Parser<?> delimiter, Parser<T> parser) {
@@ -198,7 +197,7 @@ public final class Parsers {
     }
 
     public static <T> Parser<T> between(String left, Supplier<Parser<T>> parser, String right) {
-        return between(literal(left), parser.get(), literal(right));
+        return cur -> between(literal(left), parser.get(), literal(right)).parse(cur);
     }
 
     public static <T> Parser<T> between(String left, Parser<T> parser, String right) {
@@ -206,7 +205,7 @@ public final class Parsers {
     }
 
     public static <T> Parser<T> between(Parser<?> left, Supplier<Parser<T>> parser, Parser<?> right) {
-        return between(left, parser.get(), right);
+        return cur -> between(left, parser.get(), right).parse(cur);
     }
 
     public static <T> Parser<T> between(Parser<?> left, Parser<T> parser, Parser<?> right) {
@@ -222,7 +221,7 @@ public final class Parsers {
         }
 
         @Override
-        public Optional<State<String>> parse(Cursor cur) {
+        public Optional<State<? extends String>> parse(Cursor cur) {
             final var pos = cur.pos();
             final var val = cur.in();
             final var pln = pattern.length();
@@ -245,7 +244,7 @@ public final class Parsers {
         }
 
         @Override
-        public Optional<State<String>> parse(Cursor cur) {
+        public Optional<State<? extends String>> parse(Cursor cur) {
             final var matcher = pattern.matcher(cur.in());
             // Define the start and end positions to be the current parser offset
             // and the end of the entire string.
@@ -268,7 +267,7 @@ public final class Parsers {
         }
 
         @Override
-        public Optional<State<List<T>>> parse(Cursor cur) {
+        public Optional<State<? extends List<T>>> parse(Cursor cur) {
             final var list = new ArrayList<T>();
             var state = parser.parse(cur);
             while (state.isPresent()) {

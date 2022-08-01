@@ -106,6 +106,5 @@ public final class Prelude {
             result = accumulator.apply(result, element);
         }
         return result;
-        // return Arrays.stream(list).reduce(identity, accumulator, (_a, _b) -> null);
     }
 }

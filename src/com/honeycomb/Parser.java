@@ -75,7 +75,7 @@ public interface Parser<T> {
          * @return a new parser {@link State} with te mapped result value
          * @param <U> the type of the mapped result value
          */
-        public <U> State<U> map(Function<T, U> mapping) {
+        public <U> State<U> map(Function<? super T, ? extends U> mapping) {
             return State.of(cur, mapping.apply(val));
         }
     }
@@ -88,7 +88,7 @@ public interface Parser<T> {
      * @param cur the {@link Cursor} position before this parser is invoked
      * @return the {@link State} before this parser is invoked
      */
-    Optional<State<T>> parse(Cursor cur);
+    Optional<State<? extends T>> parse(Cursor cur);
 
     /**
      * Parses the input string starting at the beginning and returns an
@@ -103,7 +103,6 @@ public interface Parser<T> {
 
     default Parser<Tuple<T, String>> then(String pattern) {
         return then(literal(pattern));
-        // return cur -> then(literal(pattern)).parse(cur);
     }
 
     default <U> Parser<Tuple<T, U>> then(Supplier<Parser<U>> that) {
@@ -112,48 +111,44 @@ public interface Parser<T> {
 
     // TODO: one-liner?
     default <U> Parser<Tuple<T, U>> then(Parser<U> that) {
-        return cur -> parse(cur).flatMap(t -> that.parse(t.cur).map(u -> State.of(u.cur, tuple(t.val, u.val))));
+        return cur -> parse(cur)
+                .flatMap(t -> that.parse(t.cur)
+                        .map(u -> State.of(u.cur, tuple(t.val, u.val))));
     }
 
     default Parser<String> skipLeft(String pattern) {
         return skipLeft(literal(pattern));
-        // return cur -> skipLeft(literal(pattern)).parse(cur);
     }
 
     default <U> Parser<U> skipLeft(Supplier<Parser<U>> that) {
-        // return skipLeft(that.get());
         return cur -> skipLeft(that.get()).parse(cur);
     }
 
     default <U> Parser<U> skipLeft(Parser<U> that) {
         return then(that).map(Tuple::_2);
-        // return cur -> then(that).parse(cur).map(s -> s.map(Tuple::_2));
     }
 
     default Parser<T> skipRight(String pattern) {
         return skipRight(literal(pattern));
-        // return cur -> skipRight(literal(pattern)).parse(cur);
     }
 
     default Parser<T> skipRight(Supplier<Parser<?>> that) {
-        // return skipRight(that.get());
         return cur -> skipRight(that.get()).parse(cur);
     }
 
     default Parser<T> skipRight(Parser<?> that) {
         return then(that).map(Tuple::_1);
-        // return cur -> then(that).parse(cur).map(s -> s.map(Tuple::_1));
     }
 
-    default Parser<T> or(Supplier<Parser<T>> that) {
+    default Parser<T> or(Supplier<Parser<? extends T>> that) {
         return cur -> or(that.get()).parse(cur);
     }
 
-    default Parser<T> or(Parser<T> that) {
+    default Parser<T> or(Parser<? extends T> that) {
         return cur -> parse(cur).or(() -> that.parse(cur));
     }
 
-    default <U> Parser<U> map(Function<T, U> mapping) {
+    default <U> Parser<U> map(Function<? super T, ? extends U> mapping) {
         return cur -> parse(cur).map(s -> s.map(mapping));
     }
 }

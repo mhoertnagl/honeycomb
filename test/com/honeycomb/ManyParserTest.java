@@ -4,10 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.honeycomb.Assert.assertOptionalPresent;
-import static com.honeycomb.Parsers.literal;
-import static com.honeycomb.Parsers.many;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.honeycomb.Assert.*;
+import static com.honeycomb.Parsers.*;
 
 class ManyParserTest {
 

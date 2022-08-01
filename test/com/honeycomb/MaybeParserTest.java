@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.honeycomb.Assert.assertOptionalPresent;
+import static com.honeycomb.Assert.*;
 import static com.honeycomb.Parsers.*;
 
 class MaybeParserTest {
