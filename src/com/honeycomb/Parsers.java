@@ -52,11 +52,11 @@ public final class Parsers {
     /**
      * Parses the string literal {@code pattern}.
      *
-     * @param pattern the string to parse
+     * @param literal the string to parse
      * @return a {@link Parser} that parses strings literal
      */
-    public static Parser<String> literal(String pattern) {
-        return new LiteralParser(pattern);
+    public static Parser<String> literal(String literal) {
+        return new LiteralParser(literal);
     }
 
     /**
@@ -151,13 +151,14 @@ public final class Parsers {
     }
 
     /**
-     * Attempts all {@link Parser}s in order continuing until the first parser
-     * matches or failing if all alternatives fail.
+     * Calls the {@link Supplier} and attempts all {@link Parser}s in order
+     * continuing until the first parser matches or failing if all
+     * alternatives fail.
      *
      * @param parser first {@link Parser} to apply
      * @param parsers variable list of alternative {@link Parser}s
      * @return a {@link Parser} that tests all alternatives in order
-     * @param <T> the common type of the parsed result value
+     * @param <T> the type of the parsed result value
      */
     @SafeVarargs
     @SuppressWarnings("unchecked")
@@ -172,14 +173,13 @@ public final class Parsers {
     }
 
     /**
-     * Calls the {@link Supplier} and attempts all {@link Parser}s in order
-     * continuing until the first parser matches or failing if all
-     * alternatives fail.
+     * Attempts all {@link Parser}s in order continuing until the first parser
+     * matches or failing if all alternatives fail.
      *
      * @param parser first {@link Parser} to apply
      * @param parsers variable list of alternative {@link Parser}s
      * @return a {@link Parser} that tests all alternatives in order
-     * @param <T> the common type of the parsed result value
+     * @param <T> the type of the parsed result value
      */
     @SafeVarargs
     @SuppressWarnings("unchecked")
@@ -189,24 +189,68 @@ public final class Parsers {
         return Prelude.reduce(parsers, (Parser<T>) parser, Parser::or);
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@link Parser} {@code parser}
+     * in a list separated by a string {@code delimiter}. The final
+     * {@link Parser} returns a list of parsed elements of type {@code T}.
+     *
+     * @param delimiter the delimiter string
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list(
             String delimiter,
             Supplier<Parser<T>> parser) {
         return cur -> list(delimiter, parser.get()).parse(cur);
     }
 
+    /**
+     * Attempts {@link Parser} {@code parser} in a list separated by a string
+     * {@code delimiter}. The final {@link Parser} returns
+     * a list of parsed elements of type {@code T}.
+     *
+     * @param delimiter the delimiter string
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list(
             String delimiter,
             Parser<T> parser) {
         return list(literal(delimiter), parser);
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@link Parser} {@code parser}
+     * in a list separated by a string {@code delimiter}. The final
+     * {@link Parser} returns a list of parsed elements of type {@code T}.
+     *
+     * @param delimiter the delimiter string
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list(
             Parser<?> delimiter,
             Supplier<Parser<T>> parser) {
         return cur -> list(delimiter, parser.get()).parse(cur);
     }
 
+    /**
+     * Attempts {@link Parser} {@code parser} in a list separated by delimiting
+     * {@link Parser}s {@code delimiter}. The final {@link Parser} returns
+     * a list of parsed elements of type {@code T}.
+     *
+     * @param delimiter {@link Parser} that parses the delimiter
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list(
             Parser<?> delimiter,
             Parser<T> parser) {
@@ -217,24 +261,79 @@ public final class Parsers {
                 .or(succeed(List.of()));
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@link Parser} {@code parser}
+     * in a list separated by a string {@code delimiter}. The final
+     * {@link Parser} returns a list of parsed elements of type {@code T}.
+     * {@link Parser} {@code parser} has to match at least once or the final
+     * {@link Parser} fails.
+     *
+     * @param delimiter the delimiter string
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list1(
             String delimiter,
             Supplier<Parser<T>> parser) {
         return cur -> list1(literal(delimiter), parser.get()).parse(cur);
     }
 
+    /**
+     * Attempts {@link Parser} {@code parser} in a list separated by a string
+     * {@code delimiter}. The final {@link Parser} returns a list of parsed
+     * elements of type {@code T}.
+     * {@link Parser} {@code parser} has to match at least once or the final
+     * {@link Parser} fails.
+     *
+     * @param delimiter the delimiter string
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list1(
             String delimiter,
             Parser<T> parser) {
         return list1(literal(delimiter), parser);
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@link Parser} {@code parser}
+     * in a list separated by delimiting {@link Parser}s {@code delimiter}.
+     * The final {@link Parser} returns a list of parsed elements of type
+     * {@code T}.
+     * {@link Parser} {@code parser} has to match at least once or the final
+     * {@link Parser} fails.
+     *
+     * @param delimiter {@link Parser} that parses the delimiter
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists and matches at
+     *         least once.
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list1(
             Parser<?> delimiter,
             Supplier<Parser<T>> parser) {
         return cur -> list1(delimiter, parser.get()).parse(cur);
     }
 
+    /**
+     * Attempts {@link Parser} {@code parser} in a list separated by delimiting
+     * {@link Parser}s {@code delimiter}. The final {@link Parser} returns
+     * a list of parsed elements of type {@code T}.
+     * {@link Parser} {@code parser} has to match at least once or the final
+     * {@link Parser} fails.
+     *
+     * @param delimiter {@link Parser} that parses the delimiter
+     * @param parser {@link Parser} that parses the elements separated
+     *        by delimiters
+     * @return a {@link Parser} that parses delimited lists and matches at
+     *         least once.
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<List<T>> list1(
             Parser<?> delimiter,
             Parser<T> parser) {
@@ -242,6 +341,18 @@ public final class Parsers {
                 .map(to(Prelude::prepend));
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@link Parser} {@code parser}
+     * between a {@code left} and a {@code right} delimiting string. Discards
+     * the {@code left} and {@code right} result and returns the {@code parser}
+     * value only.
+     *
+     * @param left the left delimiting string
+     * @param parser the {@link Parser} in between
+     * @param right the right delimiting string
+     * @return a {@link Parser} surrounded by a left and a right delimiter
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<T> between(
             String left,
             Supplier<Parser<T>> parser,
@@ -253,6 +364,17 @@ public final class Parsers {
         ).parse(cur);
     }
 
+    /**
+     * Attempts {@link Parser} {@code parser} between a {@code left} and a
+     * {@code right} delimiting string. Discards the {@code left} and
+     * {@code right} result and returns the {@code parser} value only.
+     *
+     * @param left the left delimiting string
+     * @param parser the {@link Parser} in between
+     * @param right the right delimiting string
+     * @return a {@link Parser} surrounded by a left and a right delimiter
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<T> between(
             String left,
             Parser<T> parser,
@@ -260,6 +382,18 @@ public final class Parsers {
         return between(literal(left), parser, literal(right));
     }
 
+    /**
+     * Calls the {@link Supplier} and attempts {@link Parser} {@code parser}
+     * between a {@code left} and a {@code right} {@link Parser}. Discards
+     * the {@code left} and {@code right} result and returns the {@code parser}
+     * value only.
+     *
+     * @param left the left delimiting {@link Parser}
+     * @param parser the {@link Parser} in between
+     * @param right the right delimiting {@link Parser}
+     * @return a {@link Parser} surrounded by a left and a right {@link Parser}
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<T> between(
             Parser<?> left,
             Supplier<Parser<T>> parser,
@@ -267,6 +401,17 @@ public final class Parsers {
         return cur -> between(left, parser.get(), right).parse(cur);
     }
 
+    /**
+     * Attempts {@link Parser} {@code parser} between a {@code left} and a
+     * {@code right} {@link Parser}. Discards the {@code left} and
+     * {@code right} result and returns the {@code parser} value only.
+     *
+     * @param left the left delimiting {@link Parser}
+     * @param parser the {@link Parser} in between
+     * @param right the right delimiting {@link Parser}
+     * @return a {@link Parser} surrounded by a left and a right {@link Parser}
+     * @param <T> the type of the parsed result value
+     */
     public static <T> Parser<T> between(
             Parser<?> left,
             Parser<T> parser,
@@ -274,33 +419,55 @@ public final class Parsers {
         return left.skipLeft(parser).skipRight(right);
     }
 
+    /**
+     * A {@link Parser} that accepts a literal string and succeeds if the
+     * literal matches the input.
+     */
     public static final class LiteralParser implements Parser<String> {
 
-        private final String pattern;
+        private final String literal;
 
-        public LiteralParser(String pattern) {
-            this.pattern = pattern;
+        /**
+         * Creates a new literal {@link Parser} accepting the string
+         * {@code literal} or failing otherwise.
+         *
+         * @param literal the sting literal
+         */
+        public LiteralParser(String literal) {
+            this.literal = literal;
         }
 
         @Override
         public Optional<State<? extends String>> parse(Cursor cur) {
             final var pos = cur.pos();
             final var val = cur.in();
-            final var pln = pattern.length();
+            final var pln = literal.length();
             final var vln = val.length();
-            if (pos < vln && val.substring(pos).startsWith(pattern)) {
-                return Optional.of(State.of(cur.advanceBy(pln), pattern));
+            if (pos < vln && val.substring(pos).startsWith(literal)) {
+                return Optional.of(State.of(cur.advanceBy(pln), literal));
             }
             return Optional.empty();
         }
     }
 
+    /**
+     * A {@link Parser} that accepts a regular expression string and succeeds
+     * if the pattern matches the input or failing otherwise. The regular
+     * expression allows Unicode characters.
+     */
     public static final class RegexParser implements Parser<String> {
 
-        private static final int PATTERN_FLAGS = Pattern.UNICODE_CHARACTER_CLASS;
+        private static final int PATTERN_FLAGS =
+                Pattern.UNICODE_CHARACTER_CLASS;
 
         private final Pattern pattern;
 
+        /**
+         * Creates a new regex {@link Parser} parsing the regular expression
+         * {@code regex}. The regular expression allows Unicode characters.
+         *
+         * @param regex the regular expression
+         */
         public RegexParser(String regex) {
             this.pattern = Pattern.compile(regex, PATTERN_FLAGS);
         }
@@ -323,10 +490,24 @@ public final class Parsers {
         }
     }
 
+    /**
+     * A {@link Parser} that accepts another {@link Parser} {@code parser}
+     * and invokes {@code parser} as long as there is a match.
+     * The {@link Parser} will always succeed, even if {@code parser} does
+     * not match even once.
+     *
+     * @param <T> the type of the parsed result value
+     */
     public static final class ManyParser<T> implements Parser<List<T>> {
 
         private final Parser<T> parser;
 
+        /**
+         * Creates a new {@link Parser} that applies {@link Parser}
+         * {@code parser} zero or more times.
+         *
+         * @param parser the {@link Parser} to apply zero or more times
+         */
         public ManyParser(Parser<T> parser) {
             this.parser = parser;
         }

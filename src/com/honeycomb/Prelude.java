@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 /**
+ * A functional prelude.
+ *
  * @since 1.0
  */
 public final class Prelude {

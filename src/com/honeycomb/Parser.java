@@ -101,15 +101,41 @@ public interface Parser<T> {
         return parse(new Cursor(in, 0)).map(s -> s.val);
     }
 
-    default Parser<Tuple<T, String>> then(String pattern) {
-        return then(literal(pattern));
+    /**
+     * Attempts this {@link Parser} and, if successful, continues with a
+     * {@link Parser} parsing {@code literal}. Returns a {@link Tuple}
+     * containing both parsed values.
+     *
+     * @param literal the literal string
+     * @return a {@link Parser} invoking two successive {@link Parser}s,
+     *         the second of them a literal {@link Parser}.
+     */
+    default Parser<Tuple<T, String>> then(String literal) {
+        return then(literal(literal));
     }
 
+    /**
+     * Attempts this {@link Parser} and, if successful, calls the
+     * {@link Supplier} and continues with {@code that} {@link Parser}.
+     * Returns a {@link Tuple} containing both parsed values.
+     *
+     * @param that the other {@link Parser}
+     * @return a {@link Parser} invoking two successive {@link Parser}s
+     * @param <U> the type of {@code that} parser result value
+     */
     default <U> Parser<Tuple<T, U>> then(Supplier<Parser<U>> that) {
         return cur -> then(that.get()).parse(cur);
     }
 
-    // TODO: one-liner?
+    /**
+     * Attempts this {@link Parser} and, if successful, continues with
+     * {@code that} {@link Parser}. Returns a {@link Tuple} containing both
+     * parsed values.
+     *
+     * @param that the other {@link Parser}
+     * @return a {@link Parser} invoking two successive {@link Parser}s
+     * @param <U> the type of {@code that} parser result value
+     */
     default <U> Parser<Tuple<T, U>> then(Parser<U> that) {
         return cur -> parse(cur)
                 .flatMap(t -> that.parse(t.cur)
@@ -190,14 +216,38 @@ public interface Parser<T> {
         return then(that).map(Tuple::_1);
     }
 
+    /**
+     * Attempts this {@link Parser} and, if unsuccessful, calls the
+     * {@link Supplier} and continues with {@code that} {@link Parser}.
+     * Returns the result of the first matching {@link Parser}.
+     *
+     * @param that the alternative {@link Parser}
+     * @return a {@link Parser} invoking this or {@code that} {@link Parser}
+     */
     default Parser<T> or(Supplier<Parser<? extends T>> that) {
         return cur -> or(that.get()).parse(cur);
     }
 
+    /**
+     * Attempts this {@link Parser} and, if unsuccessful, continues with
+     * {@code that} {@link Parser}. Returns the result of the first matching
+     * {@link Parser}.
+     *
+     * @param that the alternative {@link Parser}
+     * @return a {@link Parser} invoking this or {@code that} {@link Parser}
+     */
     default Parser<T> or(Parser<? extends T> that) {
         return cur -> parse(cur).or(() -> that.parse(cur));
     }
 
+    /**
+     * Maps the result of this {@link Parser} to a value of type {@code U}.
+     *
+     * @param mapping the result value mapping
+     * @return the same {@link Parser} but with the result mapped to type
+     *         {@code U}.
+     * @param <U> the type of the mapped value
+     */
     default <U> Parser<U> map(Function<? super T, ? extends U> mapping) {
         return cur -> parse(cur).map(s -> s.map(mapping));
     }
