@@ -46,7 +46,7 @@ public final class Parsers {
             regex(FLOAT_PATTERN).map(Double::parseDouble);
 
     public static <T> Parser<T> succeed(T val) {
-        return cur -> Optional.of(Parser.State.of(cur, val));
+        return cur -> Optional.of(State.of(cur, val));
     }
 
     /**
@@ -417,111 +417,5 @@ public final class Parsers {
             Parser<T> parser,
             Parser<?> right) {
         return left.skipLeft(parser).skipRight(right);
-    }
-
-    /**
-     * A {@link Parser} that accepts a literal string and succeeds if the
-     * literal matches the input.
-     */
-    public static final class LiteralParser implements Parser<String> {
-
-        private final String literal;
-
-        /**
-         * Creates a new literal {@link Parser} accepting the string
-         * {@code literal} or failing otherwise.
-         *
-         * @param literal the sting literal
-         */
-        public LiteralParser(String literal) {
-            this.literal = literal;
-        }
-
-        @Override
-        public Optional<State<? extends String>> parse(Cursor cur) {
-            final var pos = cur.pos();
-            final var val = cur.in();
-            final var pln = literal.length();
-            final var vln = val.length();
-            if (pos < vln && val.substring(pos).startsWith(literal)) {
-                return Optional.of(State.of(cur.advanceBy(pln), literal));
-            }
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * A {@link Parser} that accepts a regular expression string and succeeds
-     * if the pattern matches the input or failing otherwise. The regular
-     * expression allows Unicode characters.
-     */
-    public static final class RegexParser implements Parser<String> {
-
-        private static final int PATTERN_FLAGS =
-                Pattern.UNICODE_CHARACTER_CLASS;
-
-        private final Pattern pattern;
-
-        /**
-         * Creates a new regex {@link Parser} parsing the regular expression
-         * {@code regex}. The regular expression allows Unicode characters.
-         *
-         * @param regex the regular expression
-         */
-        public RegexParser(String regex) {
-            this.pattern = Pattern.compile(regex, PATTERN_FLAGS);
-        }
-
-        @Override
-        public Optional<State<? extends String>> parse(Cursor cur) {
-            final var matcher = pattern.matcher(cur.in());
-            // Define the start and end positions to be the current
-            // parser offset and the end of the entire string.
-            matcher.region(cur.pos(), cur.in().length());
-            // See, if the pattern matches the input at the beginning
-            // of the region as defined above.
-            if (matcher.lookingAt()) {
-                return Optional.of(State.of(
-                        cur.positionAt(matcher.end()),
-                        matcher.group())
-                );
-            }
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * A {@link Parser} that accepts another {@link Parser} {@code parser}
-     * and invokes {@code parser} as long as there is a match.
-     * The {@link Parser} will always succeed, even if {@code parser} does
-     * not match even once.
-     *
-     * @param <T> the type of the parsed result value
-     */
-    public static final class ManyParser<T> implements Parser<List<T>> {
-
-        private final Parser<T> parser;
-
-        /**
-         * Creates a new {@link Parser} that applies {@link Parser}
-         * {@code parser} zero or more times.
-         *
-         * @param parser the {@link Parser} to apply zero or more times
-         */
-        public ManyParser(Parser<T> parser) {
-            this.parser = parser;
-        }
-
-        @Override
-        public Optional<State<? extends List<T>>> parse(Cursor cur) {
-            final var list = new ArrayList<T>();
-            var state = parser.parse(cur);
-            while (state.isPresent()) {
-                list.add(state.get().val());
-                cur = state.get().cur();
-                state = parser.parse(cur);
-            }
-            return Optional.of(State.of(cur, list));
-        }
     }
 }

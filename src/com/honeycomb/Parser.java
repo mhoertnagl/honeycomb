@@ -16,71 +16,6 @@ import static com.honeycomb.Parsers.*;
 public interface Parser<T> {
 
     /**
-     * Holds the input string {@code in} and the current character position
-     * {@code pos} in the input string.
-     *
-     * @param in the input string to be parsed
-     * @param pos the character position in the input string
-     */
-    record Cursor(String in, Integer pos) {
-
-        /**
-         * Advances the {@link Cursor} position by {@code offset} bytes.
-         *
-         * @param offset the number of bytes to advance the cursor's position
-         * @return a new {@link Cursor} offset by specified number of bytes.
-         */
-        public Cursor advanceBy(Integer offset) {
-            return new Cursor(in, pos + offset);
-        }
-
-        /**
-         * Positions the {@link Cursor} at the new position {@code newPos}.
-         *
-         * @param newPos the new position of the cursor
-         * @return a new {@link Cursor} at the new position
-         */
-        public Cursor positionAt(Integer newPos) {
-            return new Cursor(in, newPos);
-        }
-    }
-
-    /**
-     * State of the parser. It holds the input {@link Cursor} and the parsed
-     * result value, usually some sort of AST structure.
-     *
-     * @param cur the input {@link Cursor}
-     * @param val the parser result value
-     * @param <T> the type of the parsed result value
-     */
-    record State<T>(Cursor cur, T val) {
-
-        /**
-         * Creates a new parser {@link State} from an input {@link Cursor}
-         * and a result value.
-         *
-         * @param cur the input {@link Cursor}
-         * @param val the result value
-         * @return a new parser {@link State}
-         * @param <U> the type of the parsed result value
-         */
-        public static <U> State<U> of(Cursor cur, U val) {
-            return new State<>(cur, val);
-        }
-
-        /**
-         * Maps the result value of this parser {@link State} to a new state.
-         *
-         * @param mapping the result value mapping
-         * @return a new parser {@link State} with te mapped result value
-         * @param <U> the type of the mapped result value
-         */
-        public <U> State<U> map(Function<? super T, ? extends U> mapping) {
-            return State.of(cur, mapping.apply(val));
-        }
-    }
-
-    /**
      * Parses the input at the current {@link Cursor} position and yields the
      * new {@link State} containing the new {@link Cursor} position and the
      * parsing result.
@@ -98,7 +33,7 @@ public interface Parser<T> {
      * @return an {@link Optional} containing the parsed result value
      */
     default Optional<T> parse(String in) {
-        return parse(new Cursor(in, 0)).map(s -> s.val);
+        return parse(new Cursor(in, 0)).map(s -> s.val());
     }
 
     /**
@@ -138,8 +73,8 @@ public interface Parser<T> {
      */
     default <U> Parser<Tuple<T, U>> then(Parser<U> that) {
         return cur -> parse(cur)
-                .flatMap(t -> that.parse(t.cur)
-                        .map(u -> State.of(u.cur, tuple(t.val, u.val))));
+                .flatMap(t -> that.parse(t.cur())
+                        .map(u -> State.of(u.cur(), tuple(t.val(), u.val()))));
     }
 
     /**
