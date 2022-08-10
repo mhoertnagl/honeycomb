@@ -14,7 +14,7 @@ class AnyParserTest {
         final var p3 = literal("c");
         final var parser = any(p1, p2, p3);
         final var value = parser.parse("a");
-        assertOptionalPresent("a", value);
+        assertValid("a", value);
     }
 
     @Test
@@ -24,7 +24,7 @@ class AnyParserTest {
         final var p3 = literal("c");
         final var parser = any(p1, p2, p3);
         final var value = parser.parse("b");
-        assertOptionalPresent("b", value);
+        assertValid("b", value);
     }
 
     @Test
@@ -34,7 +34,7 @@ class AnyParserTest {
         final var p3 = literal("c");
         final var parser = any(p1, p2, p3);
         final var value = parser.parse("c");
-        assertOptionalPresent("c", value);
+        assertValid("c", value);
     }
 
     @Test
@@ -44,7 +44,7 @@ class AnyParserTest {
         final var p3 = literal("c");
         final var parser = any(p1, p2, p3);
         final var value = parser.parse("d");
-        assertOptionalEmpty(value);
+        assertError(value);
     }
 
     @Test
@@ -54,7 +54,7 @@ class AnyParserTest {
         final var p3 = literal("c").map(CNode::new);
         final var parser = any(p1, p2, p3);
         final var value = parser.parse("a");
-        assertOptionalPresent(new ANode("a"), value);
+        assertValid(new ANode("a"), value);
     }
 
     @Test
@@ -64,7 +64,7 @@ class AnyParserTest {
         final var p3 = literal("c").map(CNode::new);
         final var parser = any(p1, p2, p3);
         final var value = parser.parse("b");
-        assertOptionalPresent(new BNode("b"), value);
+        assertValid(new BNode("b"), value);
     }
 
     @Test
@@ -74,7 +74,7 @@ class AnyParserTest {
         final var p3 = literal("c").map(CNode::new);
         final var parser = any(p1, p2, p3);
         final var value = parser.parse("c");
-        assertOptionalPresent(new CNode("c"), value);
+        assertValid(new CNode("c"), value);
     }
 
     interface Node {}

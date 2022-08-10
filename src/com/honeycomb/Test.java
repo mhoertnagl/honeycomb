@@ -1,7 +1,5 @@
 package com.honeycomb;
 
-import java.util.Optional;
-
 import static com.honeycomb.Conversions.*;
 import static com.honeycomb.Parsers.*;
 
@@ -48,7 +46,7 @@ public class Test {
             );
         }
 
-        public static Optional<Ast.Expr> parse(String in) {
+        public static State<? extends Ast.Expr> parse(String in) {
             return term().parse(in);
         }
 
@@ -70,13 +68,15 @@ public class Test {
 //                Lang.factor
 //        );
 //
-//        public static Optional<Ast.Expr> parse(String in) {
-//            return term.parse(in);
-//        }
+//public static State<? extends Ast.Expr> parse(String in) {
+//    return term().parse(in);
+//}
     }
 
     public static void main(String[] args) {
         final var expr = Lang.parse("a+1*(3+b)");
-        System.out.println(expr);
+        if (expr.isValid()) {
+            System.out.println(expr.val());
+        }
     }
 }

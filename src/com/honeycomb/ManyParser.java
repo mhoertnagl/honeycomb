@@ -2,7 +2,6 @@ package com.honeycomb;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * A {@link Parser} that accepts another {@link Parser} {@code parser}
@@ -27,14 +26,14 @@ public final class ManyParser<T> implements Parser<List<T>> {
     }
 
     @Override
-    public Optional<State<? extends List<T>>> parse(Cursor cur) {
+    public State<? extends List<T>> parse(Cursor cur) {
         final var list = new ArrayList<T>();
         var state = parser.parse(cur);
-        while (state.isPresent()) {
-            list.add(state.get().val());
-            cur = state.get().cur();
+        while (state.isValid()) {
+            list.add(state.val().orElse(null));
+            cur = state.cur().orElse(null);
             state = parser.parse(cur);
         }
-        return Optional.of(State.of(cur, list));
+        return State.of(cur, list);
     }
 }

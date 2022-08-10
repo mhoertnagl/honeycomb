@@ -46,7 +46,7 @@ public final class Parsers {
             regex(FLOAT_PATTERN).map(Double::parseDouble);
 
     public static <T> Parser<T> succeed(T val) {
-        return cur -> Optional.of(State.of(cur, val));
+        return cur -> State.of(cur, val);
     }
 
     /**

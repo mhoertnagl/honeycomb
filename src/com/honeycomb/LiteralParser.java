@@ -1,7 +1,5 @@
 package com.honeycomb;
 
-import java.util.Optional;
-
 /**
  * A {@link Parser} that accepts a literal string and succeeds if the
  * literal matches the input.
@@ -21,14 +19,14 @@ final class LiteralParser implements Parser<String> {
     }
 
     @Override
-    public Optional<State<? extends String>> parse(Cursor cur) {
+    public State<? extends String> parse(Cursor cur) {
         final var pos = cur.pos();
         final var val = cur.in();
         final var pln = literal.length();
         final var vln = val.length();
         if (pos < vln && val.substring(pos).startsWith(literal)) {
-            return Optional.of(State.of(cur.advanceBy(pln), literal));
+            return State.of(cur.advanceBy(pln), literal);
         }
-        return Optional.empty();
+        return State.error(cur, literal + " expected");
     }
 }

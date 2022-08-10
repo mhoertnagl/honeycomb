@@ -23,7 +23,7 @@ public interface Parser<T> {
      * @param cur the {@link Cursor} position before this parser is invoked
      * @return the {@link State} before this parser is invoked
      */
-    Optional<State<? extends T>> parse(Cursor cur);
+    State<? extends T> parse(Cursor cur);
 
     /**
      * Parses the input string starting at the beginning and returns an
@@ -32,8 +32,8 @@ public interface Parser<T> {
      * @param in the input string
      * @return an {@link Optional} containing the parsed result value
      */
-    default Optional<T> parse(String in) {
-        return parse(new Cursor(in, 0)).map(s -> s.val());
+    default State<? extends T> parse(String in) {
+        return parse(new Cursor(in, 0)); //.map(s -> s.val());
     }
 
     /**
@@ -73,8 +73,10 @@ public interface Parser<T> {
      */
     default <U> Parser<Tuple<T, U>> then(Parser<U> that) {
         return cur -> parse(cur)
-                .flatMap(t -> that.parse(t.cur())
-                        .map(u -> State.of(u.cur(), tuple(t.val(), u.val()))));
+                .flatMap((ct, t) -> that.parse(ct)
+                .flatMap((cu, u) -> State.of(cu, tuple(t, u))));
+//                .flatMap(t -> that.parse(t.cur())
+//                        .map(u -> State.of(u.cur(), tuple(t.val(), u.val()))));
     }
 
     /**
@@ -171,8 +173,16 @@ public interface Parser<T> {
      * @param that the alternative {@link Parser}
      * @return a {@link Parser} invoking this or {@code that} {@link Parser}
      */
+    // TODO: Or-Parser
     default Parser<T> or(Parser<? extends T> that) {
-        return cur -> parse(cur).or(() -> that.parse(cur));
+        return cur -> {
+            final var s = parse(cur);
+            if (s.isValid()) {
+                return s;
+            }
+            return that.parse(cur);
+        };
+        // return cur -> parse(cur).or(() -> that.parse(cur));
     }
 
     /**
@@ -184,6 +194,6 @@ public interface Parser<T> {
      * @param <U> the type of the mapped value
      */
     default <U> Parser<U> map(Function<? super T, ? extends U> mapping) {
-        return cur -> parse(cur).map(s -> s.map(mapping));
+        return cur -> parse(cur).map(mapping);
     }
 }

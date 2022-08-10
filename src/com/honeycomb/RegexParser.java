@@ -1,6 +1,5 @@
 package com.honeycomb;
 
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -26,7 +25,7 @@ public final class RegexParser implements Parser<String> {
     }
 
     @Override
-    public Optional<State<? extends String>> parse(Cursor cur) {
+    public State<? extends String> parse(Cursor cur) {
         final var matcher = pattern.matcher(cur.in());
         // Define the start and end positions to be the current
         // parser offset and the end of the entire string.
@@ -34,11 +33,11 @@ public final class RegexParser implements Parser<String> {
         // See, if the pattern matches the input at the beginning
         // of the region as defined above.
         if (matcher.lookingAt()) {
-            return Optional.of(State.of(
+            return State.of(
                     cur.positionAt(matcher.end()),
-                    matcher.group())
+                    matcher.group()
             );
         }
-        return Optional.empty();
+        return State.error(cur, "Regex mismatch: " + pattern);
     }
 }

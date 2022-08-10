@@ -13,14 +13,14 @@ class MaybeParserTest {
     void parseExisting() {
         final var parser = maybe(literal("private"));
         final var value = parser.parse("private");
-        assertOptionalPresent(Optional.of("private"), value);
+        assertValid(Optional.of("private"), value);
     }
 
     @Test
     void parseNonExisting() {
         final var parser = maybe(literal("private"));
         final var value = parser.parse("");
-        assertOptionalPresent(Optional.empty(), value);
+        assertValid(Optional.empty(), value);
     }
 
     @Test
@@ -30,7 +30,7 @@ class MaybeParserTest {
                 .map(Optional::isPresent)
                 .map(MethodNode::new);
         final var value = parser.parse("private");
-        assertOptionalPresent(new MethodNode(true), value);
+        assertValid(new MethodNode(true), value);
     }
 
     @Test
@@ -40,6 +40,6 @@ class MaybeParserTest {
                 .map(Optional::isPresent)
                 .map(MethodNode::new);
         final var value = parser.parse("");
-        assertOptionalPresent(new MethodNode(false), value);
+        assertValid(new MethodNode(false), value);
     }
 }

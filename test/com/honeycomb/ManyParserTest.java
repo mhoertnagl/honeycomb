@@ -13,21 +13,21 @@ class ManyParserTest {
     void parseZeroTimes() {
         final var parser = many(literal("a"));
         final var value = parser.parse("");
-        assertOptionalPresent(List.of(), value);
+        assertValid(List.of(), value);
     }
 
     @Test
     void parseOnce() {
         final var parser = many(literal("a"));
         final var value = parser.parse("a");
-        assertOptionalPresent(List.of("a"), value);
+        assertValid(List.of("a"), value);
     }
 
     @Test
     void parseTwice() {
         final var parser = many(literal("a"));
         final var value = parser.parse("aa");
-        assertOptionalPresent(List.of("a", "a"), value);
+        assertValid(List.of("a", "a"), value);
     }
 
     @Test
@@ -41,6 +41,6 @@ class ManyParserTest {
         );
         final var parser = many(literal("a").map(Node::new));
         final var value = parser.parse("aaaa");
-        assertOptionalPresent(expected, value);
+        assertValid(expected, value);
     }
 }
