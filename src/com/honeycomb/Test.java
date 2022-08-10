@@ -3,8 +3,8 @@ package com.honeycomb;
 import static com.honeycomb.Conversions.*;
 import static com.honeycomb.Parsers.*;
 
-// TODO: Indirection required?
-// TODO: error reporting?
+// TODO: Better way to handle the state results without explicit methods
+// TODO: FUnctional way to express or?
 // TODO: WS aware versions.
 
 public class Test {
@@ -13,11 +13,31 @@ public class Test {
 
         public interface Expr { }
 
-        public record NumExpr(Integer num) implements Expr { }
+        public record NumExpr(Integer num) implements Expr {
 
-        public record VarExpr(String name) implements Expr { }
+            @Override
+            public String toString() {
+                return num.toString();
+            }
+        }
 
-        public record BinOpExpr(Expr left, String op, Expr right) implements Expr { }
+        public record VarExpr(String name) implements Expr {
+
+            @Override
+            public String toString() {
+                return name;
+            }
+        }
+
+        public record BinOpExpr(Expr left, String op, Expr right) implements Expr {
+
+            @Override
+            public String toString() {
+                final var lhs = left.toString();
+                final var rhs = right.toString();
+                return String.format("(%s %s %s)", lhs, op, rhs);
+            }
+        }
     }
 
     class Lang {
@@ -74,9 +94,11 @@ public class Test {
     }
 
     public static void main(String[] args) {
-        final var expr = Lang.parse("a+1*(3+b)");
+        final var expr = Lang.parse("1*(3+b)+a");
         if (expr.isValid()) {
-            System.out.println(expr.val());
+            System.out.println(expr.val().orElse(null));
+        } else {
+            System.out.println(expr.error().orElse(null));
         }
     }
 }

@@ -1,10 +1,7 @@
 package com.honeycomb;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.honeycomb.Prelude.Fun2;
 
@@ -17,25 +14,43 @@ import com.honeycomb.Prelude.Fun2;
 public abstract class State<T> {
 
     /**
-     * Creates a new parser {@link State} from an input {@link Cursor}
+     * Creates a new parser {@link State.Valid} from an input {@link Cursor}
      * and a result value.
      *
      * @param cur the input {@link Cursor}
      * @param val the result value
-     * @return a new parser {@link State}
+     * @return a new parser {@link State.Valid}
      * @param <U> the type of the parsed result value
      */
     public static <U> State<U> of(Cursor cur, U val) {
         return new Valid<>(cur, val);
     }
 
-    public static <U> State<U> error(Cursor cur, String error) {
-        final var errors = new ArrayList<String>();
-        errors.add(error);
-        return error(cur, errors);
+    /**
+     * Creates a new parser {@link State.Error} from an input {@link Cursor}
+     * and an error {@code message} string.
+     *
+     * @param cur the input {@link Cursor}
+     * @param message the error {@code message} string
+     * @return a new parser {@link State.Error}
+     * @param <U> the type of the parsed result value
+     */
+    public static <U> State<U> error(Cursor cur, String message) {
+        final var line = cur.getLineNo();
+        final var col = cur.getCharPos();
+        return error(cur, new ErrorMessage(line, col, message));
     }
 
-    public static <U> State<U> error(Cursor cur, List<String> error) {
+    /**
+     * Creates a new parser {@link State.Error} from an input {@link Cursor}
+     * and an {@link ErrorMessage}.
+     *
+     * @param cur the input {@link Cursor}
+     * @param error the {@link ErrorMessage}
+     * @return a new parser {@link State.Error}
+     * @param <U> the type of the parsed result value
+     */
+    public static <U> State<U> error(Cursor cur, ErrorMessage error) {
         return new Error<>(cur, error);
     }
 
@@ -58,7 +73,7 @@ public abstract class State<T> {
 
     public abstract Optional<T> val();
 
-    public abstract List<String> errors();
+    public abstract Optional<ErrorMessage> error();
 
     /**
      * State of the parser. It holds the input {@link Cursor} and the parsed
@@ -72,8 +87,8 @@ public abstract class State<T> {
         private final T val;
 
         /**
-         * State of the parser. It holds the input {@link Cursor} and the parsed
-         * result value, usually some sort of AST structure.
+         * State of the parser. It holds the input {@link Cursor} and the
+         * parsed result value, usually some sort of AST structure.
          *
          * @param cur the input {@link Cursor}
          * @param val the parser result value
@@ -114,29 +129,29 @@ public abstract class State<T> {
         }
 
         @Override
-        public List<String> errors() {
-            return new ArrayList<>();
+        public Optional<ErrorMessage> error() {
+            return Optional.empty();
         }
     }
     
     public static final class Error<T> extends State<T> {
 
         private final Cursor cur;
-        private final List<String> errors;
+        private final ErrorMessage error;
 
-        private Error(Cursor cur, List<String> errors) {
+        private Error(Cursor cur, ErrorMessage error) {
             this.cur = cur;
-            this.errors = errors;
+            this.error = error;
         }
 
         @Override
         public <U> State<U> flatMap(Fun2<Cursor, ? super T, State<U>> mapping) {
-            return State.error(cur, errors);
+            return State.error(cur, error);
         }
 
         @Override
         public <U> State<U> map(Function<? super T, ? extends U> mapping) {
-            return State.error(cur, errors);
+            return State.error(cur, error);
         }
 
 //        @Override
@@ -161,10 +176,23 @@ public abstract class State<T> {
         }
 
         @Override
-        public List<String> errors() {
-            return errors;
+        public Optional<ErrorMessage> error() {
+            return Optional.of(error);
         }
     }
 
-    public record ErrorMessage()
+    /**
+     * An error message with additional positional information.
+     *
+     * @param line the line number
+     * @param col the character position within {@code line}
+     * @param message the error {@code message} string
+     */
+    public record ErrorMessage(int line, int col, String message) {
+
+        @Override
+        public String toString() {
+            return String.format("%d:%d ERROR: %s", line, col, message);
+        }
+    }
 }

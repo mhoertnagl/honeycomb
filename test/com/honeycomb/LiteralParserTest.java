@@ -18,7 +18,14 @@ class LiteralParserTest {
     void parseInvalid() {
         final var parser = literal("test");
         final var value = parser.parse("Test");
-        assertError(value, "hui");
+        assertError(value, new State.ErrorMessage(1, 1, "'test' expected"));
+    }
+
+    @Test
+    void parseInvalid2() {
+        final var parser = literal("test").then(literal("this"));
+        final var value = parser.parse("testthat");
+        assertError(value, new State.ErrorMessage(1, 5, "'this' expected"));
     }
 
     @Test

@@ -20,7 +20,7 @@ class RegexParserTest {
     void parseInvalid() {
         final var parser = regex(ID);
         final var value = parser.parse("42");
-        assertError(value);
+        assertError(value, new State.ErrorMessage(1, 1, "regex mismatch: '[a-zA-Z][a-zA-Z0-9]*' expected"));
     }
 
     @Test

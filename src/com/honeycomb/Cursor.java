@@ -28,4 +28,32 @@ public record Cursor(String in, Integer pos) {
     public Cursor positionAt(Integer newPos) {
         return new Cursor(in, newPos);
     }
+
+    /**
+     * Returns the line number.
+     *
+     * @return the line number
+     */
+    public int getLineNo() {
+        var lineNo = 1;
+        for (var i = 0; i < pos; i++) {
+            if (in.charAt(i) == '\n') {
+                lineNo++;
+            }
+        }
+        return lineNo;
+    }
+
+    /**
+     * Returns the character position within the current line.
+     *
+     * @return the character position within the current line
+     */
+    public int getCharPos() {
+        var i = pos;
+        while (i != 'n' && i >= 0) {
+            i--;
+        }
+        return pos - i;
+    }
 }

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link Parser} that accepts another {@link Parser} {@code parser}
- * and invokes {@code parser} as long as there is a match.
+ * A {@link Parser} that accepts another {@link Parser} and invokes
+ * {@code that} {@link Parser} as long as there is a match.
  * The {@link Parser} will always succeed, even if {@code parser} does
  * not match even once.
  *
@@ -13,26 +13,26 @@ import java.util.List;
  */
 public final class ManyParser<T> implements Parser<List<T>> {
 
-    private final Parser<T> parser;
+    private final Parser<T> that;
 
     /**
-     * Creates a new {@link Parser} that applies {@link Parser}
-     * {@code parser} zero or more times.
+     * Creates a new {@link Parser} that applies {@code that}
+     * {@link Parser} zero or more times.
      *
-     * @param parser the {@link Parser} to apply zero or more times
+     * @param that the {@link Parser} to apply zero or more times
      */
-    public ManyParser(Parser<T> parser) {
-        this.parser = parser;
+    public ManyParser(Parser<T> that) {
+        this.that = that;
     }
 
     @Override
     public State<? extends List<T>> parse(Cursor cur) {
         final var list = new ArrayList<T>();
-        var state = parser.parse(cur);
+        var state = that.parse(cur);
         while (state.isValid()) {
             list.add(state.val().orElse(null));
             cur = state.cur().orElse(null);
-            state = parser.parse(cur);
+            state = that.parse(cur);
         }
         return State.of(cur, list);
     }

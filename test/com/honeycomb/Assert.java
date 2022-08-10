@@ -1,8 +1,5 @@
 package com.honeycomb;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class Assert {
@@ -16,8 +13,8 @@ public final class Assert {
         assertFalse(state.isValid());
     }
 
-    public static void assertError(State<?> state, String... errors) {
+    public static void assertError(State<?> state, State.ErrorMessage error) {
         assertFalse(state.isValid());
-        assertEquals(Arrays.stream(errors).toList(), state.errors());
+        assertEquals(error, state.error().orElse(null));
     }
 }

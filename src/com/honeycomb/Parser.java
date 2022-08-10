@@ -75,8 +75,6 @@ public interface Parser<T> {
         return cur -> parse(cur)
                 .flatMap((ct, t) -> that.parse(ct)
                 .flatMap((cu, u) -> State.of(cu, tuple(t, u))));
-//                .flatMap(t -> that.parse(t.cur())
-//                        .map(u -> State.of(u.cur(), tuple(t.val(), u.val()))));
     }
 
     /**
@@ -173,15 +171,15 @@ public interface Parser<T> {
      * @param that the alternative {@link Parser}
      * @return a {@link Parser} invoking this or {@code that} {@link Parser}
      */
-    // TODO: Or-Parser
     default Parser<T> or(Parser<? extends T> that) {
-        return cur -> {
-            final var s = parse(cur);
-            if (s.isValid()) {
-                return s;
-            }
-            return that.parse(cur);
-        };
+        return new OrParser<>(this, that);
+//        return cur -> {
+//            final var s = parse(cur);
+//            if (s.isValid()) {
+//                return s;
+//            }
+//            return that.parse(cur);
+//        };
         // return cur -> parse(cur).or(() -> that.parse(cur));
     }
 

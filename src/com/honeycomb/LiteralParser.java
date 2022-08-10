@@ -27,6 +27,6 @@ final class LiteralParser implements Parser<String> {
         if (pos < vln && val.substring(pos).startsWith(literal)) {
             return State.of(cur.advanceBy(pln), literal);
         }
-        return State.error(cur, literal + " expected");
+        return State.error(cur, String.format("'%s' expected", literal));
     }
 }
