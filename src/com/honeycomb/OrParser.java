@@ -1,8 +1,5 @@
 package com.honeycomb;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A {@link Parser} that accepts two {@link Parser}s {@code tis} and
  * {@code tat}. {@link Parser} {@code tat} is only invoked if and only

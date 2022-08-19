@@ -6,8 +6,7 @@ import java.util.function.Function;
 import com.honeycomb.Prelude.Fun2;
 
 /**
- * State of the parser. It holds the input {@link Cursor} and the parsed
- * result value, usually some sort of AST structure.
+ * State of the parser. It can be either {@link Valid} or {@link Error}.
  *
  * @param <T> the type of the parsed result value
  */
@@ -54,10 +53,17 @@ public abstract class State<T> {
         return new Error<>(cur, error);
     }
 
+    /**
+     * Maps the result value of this parser {@link State} to a new state.
+     *
+     * @param mapping the result value mapping
+     * @return a new parser {@link State} with te mapped result state
+     * @param <U> the type of the mapped result value
+     */
     public abstract <U> State<U> flatMap(Fun2<Cursor, ? super T, State<U>> mapping);
 
     /**
-     * Maps the result value of this parser {@link State} to a new state.
+     * Maps the result value of this parser {@link State} to a new value.
      *
      * @param mapping the result value mapping
      * @return a new parser {@link State} with te mapped result value
@@ -67,17 +73,37 @@ public abstract class State<T> {
 
 //    public abstract State<T> or(Supplier<State<? extends T>> alternative);
 
+    /**
+     * Returns true iff this {@link State} is a {@link Valid} state.
+     *
+     * @return true iff a {@link Valid} state.
+     */
     public abstract boolean isValid();
 
+    /**
+     * Returns the {@link Cursor}.
+     *
+     * @return the {@link Cursor}
+     */
     public abstract Optional<Cursor> cur();
 
+    /**
+     * Returns the value.
+     *
+     * @return the value
+     */
     public abstract Optional<T> val();
 
+    /**
+     * Returns the {@link ErrorMessage}.
+     *
+     * @return the {@link ErrorMessage}
+     */
     public abstract Optional<ErrorMessage> error();
 
     /**
-     * State of the parser. It holds the input {@link Cursor} and the parsed
-     * result value, usually some sort of AST structure.
+     * Valid state of the parser. It holds the input {@link Cursor} and the
+     * parsed result value, usually some sort of AST structure.
      *
      * @param <T> the type of the parsed result value
      */
@@ -87,8 +113,7 @@ public abstract class State<T> {
         private final T val;
 
         /**
-         * State of the parser. It holds the input {@link Cursor} and the
-         * parsed result value, usually some sort of AST structure.
+         * Creates a new valid state.
          *
          * @param cur the input {@link Cursor}
          * @param val the parser result value
@@ -133,12 +158,24 @@ public abstract class State<T> {
             return Optional.empty();
         }
     }
-    
+
+    /**
+     * Error state of the parser. It holds the input {@link Cursor} and an
+     * error message.
+     *
+     * @param <T> the type of the parsed result value
+     */
     public static final class Error<T> extends State<T> {
 
         private final Cursor cur;
         private final ErrorMessage error;
 
+        /**
+         * Creates a new error state.
+         *
+         * @param cur the input {@link Cursor}
+         * @param error the {@link ErrorMessage}
+         */
         private Error(Cursor cur, ErrorMessage error) {
             this.cur = cur;
             this.error = error;

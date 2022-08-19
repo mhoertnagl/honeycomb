@@ -38,6 +38,7 @@ public final class RegexParser implements Parser<String> {
                     matcher.group()
             );
         }
-        return State.error(cur, String.format("regex mismatch: '%s' expected", pattern));
+        var msg = String.format("regex mismatch: '%s' expected", pattern);
+        return State.error(cur, msg);
     }
 }

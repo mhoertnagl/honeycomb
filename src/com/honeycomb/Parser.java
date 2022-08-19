@@ -173,14 +173,6 @@ public interface Parser<T> {
      */
     default Parser<T> or(Parser<? extends T> that) {
         return new OrParser<>(this, that);
-//        return cur -> {
-//            final var s = parse(cur);
-//            if (s.isValid()) {
-//                return s;
-//            }
-//            return that.parse(cur);
-//        };
-        // return cur -> parse(cur).or(() -> that.parse(cur));
     }
 
     /**

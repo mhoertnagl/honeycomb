@@ -1,10 +1,8 @@
 package com.honeycomb;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 import static com.honeycomb.Conversions.to;
 
@@ -165,11 +163,9 @@ public final class Parsers {
     public static <T> Parser<T> any(
             Supplier<Parser<? extends T>> parser,
             Supplier<Parser<? extends T>>... parsers) {
-        return cur -> Prelude.reduce(
-                parsers,
-                (Parser<T>) parser.get(),
-                Parser::or
-        ).parse(cur);
+        return cur -> Prelude
+                .reduce(parsers, (Parser<T>) parser.get(), Parser::or)
+                .parse(cur);
     }
 
     /**
@@ -337,7 +333,8 @@ public final class Parsers {
     public static <T> Parser<List<T>> list1(
             Parser<?> delimiter,
             Parser<T> parser) {
-        return parser.then(many(delimiter.skipLeft(parser)))
+        return parser
+                .then(many(delimiter.skipLeft(parser)))
                 .map(to(Prelude::prepend));
     }
 
@@ -357,11 +354,8 @@ public final class Parsers {
             String left,
             Supplier<Parser<T>> parser,
             String right) {
-        return cur -> between(
-                literal(left),
-                parser.get(),
-                literal(right)
-        ).parse(cur);
+        return cur -> between(literal(left), parser.get(), literal(right))
+                .parse(cur);
     }
 
     /**
